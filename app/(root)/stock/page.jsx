@@ -1,15 +1,14 @@
-"use client"
+"use client";
 
-import Image from "next/image"
+import Image from "next/image";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
-} from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-// Example static data
 const stockData = [
   {
     id: 1,
@@ -47,59 +46,85 @@ const stockData = [
     price: 2100,
     stock: 8,
   },
-]
+];
 
 const Stock = () => {
   return (
-    <div className="p-4">
-      <Card className="border rounded-lg shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Stock Product List</CardTitle>
+    <div className="">
+      <Card className="border rounded-md shadow-sm">
+        <CardHeader className="border-b py-2 px-3">
+          <CardTitle className="text-base font-semibold">
+            Stock Product List
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <ScrollArea className="max-h-[70vh] w-full overflow-auto">
-            <table className="w-full min-w-[800px] text-sm">
-              <thead className="bg-muted/50 border-b">
-                <tr className="text-left">
-                  <th className="p-3 font-medium">No.</th>
-                  <th className="p-3 font-medium">Photo</th>
-                  <th className="p-3 font-medium">Name</th>
-                  <th className="p-3 font-medium">Category</th>
-                  <th className="p-3 font-medium">Supplier</th>
-                  <th className="p-3 font-medium">Price</th>
-                  <th className="p-3 font-medium">Stock</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stockData.map((item, index) => (
-                  <tr
-                    key={item.id}
-                    className="border-b hover:bg-muted/30 transition-colors"
-                  >
-                    <td className="p-3">{index + 1}</td>
-                    <td className="p-3">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        width={40}
-                        height={40}
-                        className="rounded-md"
-                      />
-                    </td>
-                    <td className="p-3">{item.name}</td>
-                    <td className="p-3">{item.category}</td>
-                    <td className="p-3">{item.supplier}</td>
-                    <td className="p-3">Rs. {item.price}</td>
-                    <td className="p-3">{item.stock}</td>
+
+        <CardContent className="p-0">
+          <ScrollArea className="max-h-[65vh] rounded-md">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px] border-collapse text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="border px-2 py-1 text-left font-medium w-12">
+                      No.
+                    </th>
+                    <th className="border px-2 py-1 text-left font-medium">
+                      Photo
+                    </th>
+                    <th className="border px-2 py-1 text-left font-medium">
+                      Name
+                    </th>
+                    <th className="border px-2 py-1 text-left font-medium">
+                      Category
+                    </th>
+                    <th className="border px-2 py-1 text-left font-medium">
+                      Supplier
+                    </th>
+                    <th className="border px-2 py-1 text-center font-medium">
+                      Price
+                    </th>
+                    <th className="border px-2 py-1 text-center font-medium">
+                      Stock
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {stockData.map((item, index) => (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-muted/30 transition-colors"
+                    >
+                      <td className="border px-2 py-1 text-center">
+                        {index + 1}
+                      </td>
+                      <td className="border px-2 py-1">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          width={35}
+                          height={35}
+                          className="rounded"
+                        />
+                      </td>
+                      <td className="border px-2 py-1">{item.name}</td>
+                      <td className="border px-2 py-1">{item.category}</td>
+                      <td className="border px-2 py-1">{item.supplier}</td>
+                      <td className="border px-2 py-1 text-center">
+                        Rs. {item.price}
+                      </td>
+                      <td className="border px-2 py-1 text-center">
+                        {item.stock}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </ScrollArea>
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default Stock
+export default Stock;

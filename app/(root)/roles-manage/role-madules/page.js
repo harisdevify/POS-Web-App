@@ -32,51 +32,52 @@ export default function RolesMadules() {
   }
 
   return (
-    <div className="p-4">
-      <Card className="shadow-md rounded-xl border">
-        <CardHeader className="bg-muted/40 border-b rounded-t-xl">
-          <CardTitle className="text-lg font-medium">Role Modules</CardTitle>
-        </CardHeader>
+    <div className="overflow-hidden rounded-md border">
+      {/* Heading Section */}
+      <div className="px-4 py-2 text-base font-semibold border-b bg-white">
+        Role Modules
+      </div>
 
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-16 text-center">No.</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="text-center">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {roles.map((role, idx) => (
-                <TableRow key={role.id} className="hover:bg-muted/30">
-                  <TableCell className="text-center">{idx + 1}</TableCell>
-                  <TableCell className="font-medium">{role.name}</TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => handleView(role)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        onClick={() => handleEdit(role)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse bg-white">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border text-center w-16">No.</th>
+              <th className="py-2 px-4 border text-left">Name</th>
+              <th className="py-2 px-4 border text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {roles.map((role, idx) => (
+              <tr key={role.id}>
+                <td className="py-2 px-4 border text-center">{idx + 1}</td>
+                <td className="py-2 px-4 border">{role.name}</td>
+                <td className="py-2 px-4 border text-center">
+                  <div className="flex justify-center gap-2">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="border p-1 hover:bg-gray-100"
+                      onClick={() => handleView(role)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="border p-1 hover:bg-gray-100"
+                      onClick={() => handleEdit(role)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* View Dialog */}
       <Dialog open={!!selectedRole} onOpenChange={() => setSelectedRole(null)}>
@@ -85,7 +86,7 @@ export default function RolesMadules() {
             <DialogTitle>View Role Module</DialogTitle>
           </DialogHeader>
           {selectedRole && (
-            <div className="py-2">
+            <div className="py-2 space-y-1">
               <p><strong>ID:</strong> {selectedRole.id}</p>
               <p><strong>Name:</strong> {selectedRole.name}</p>
             </div>

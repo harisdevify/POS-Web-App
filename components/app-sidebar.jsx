@@ -38,8 +38,7 @@ const data = {
   },
   teams: [
     { name: "POS", logo: GalleryVerticalEnd, plan: "Web App" },
-    { name: "Acme Corp.", logo: AudioWaveform, plan: "Startup" },
-    { name: "Evil Corp.", logo: Command, plan: "Free" },
+    
   ],
   pages: [
     {

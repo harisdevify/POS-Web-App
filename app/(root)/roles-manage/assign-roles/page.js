@@ -1,8 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -37,73 +35,91 @@ export default function AssignRoles() {
   }
 
   return (
-    <div className="p-4">
-      <Card className="shadow-md rounded-xl border">
-        <CardHeader className="bg-muted/40 border-b rounded-t-xl">
-          <CardTitle className="text-lg font-medium">Assign Roles</CardTitle>
-        </CardHeader>
+    <div className="overflow-hidden rounded-md border bg-white">
+      {/* Header */}
+      <div className="px-4 py-2 text-base font-semibold border-b">
+        Assign Roles
+      </div>
 
-        <div className="p-4 flex items-center gap-3 border-b">
-          <Label htmlFor="roleName" className="text-sm font-medium">
-            Role Name:
-          </Label>
-          <Input
-            id="roleName"
-            placeholder="Enter role name..."
-            value={roleName}
-            onChange={(e) => setRoleName(e.target.value)}
-            className="max-w-sm"
-          />
-        </div>
+      {/* Role Name Input */}
+      <div className="p-4 flex flex-wrap items-center gap-3 border-b">
+        <Label htmlFor="roleName" className="text-sm font-medium">
+          Role Name:
+        </Label>
+        <Input
+          id="roleName"
+          placeholder="Enter role name..."
+          value={roleName}
+          onChange={(e) => setRoleName(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
 
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-16 text-center">No.</TableHead>
-                <TableHead>Module</TableHead>
-                <TableHead className="text-center">Permissions</TableHead>
-              </TableRow>
-            </TableHeader>
+      {/* Table */}
+      <div className="overflow-x-auto custom-scroll">
+        <table className="min-w-full border-collapse bg-white">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border text-center w-16">No.</th>
+              <th className="py-2 px-4 border text-left">Module</th>
+              <th className="py-2 px-4 border text-center">Permissions</th>
+            </tr>
+          </thead>
 
-            <TableBody>
-              {modules.map((m, idx) => (
-                <TableRow key={m.id} className="hover:bg-muted/30">
-                  <TableCell className="text-center">{idx + 1}</TableCell>
-                  <TableCell className="font-medium">{m.module}</TableCell>
+          <tbody>
+            {modules.map((m, idx) => (
+              <tr key={m.id}>
+                <td className="py-2 px-4 border text-center">{idx + 1}</td>
+                <td className="py-2 px-4 border">{m.module}</td>
+                <td className="py-2 px-4 border text-center">
+                  <div className="flex items-center justify-center gap-6 flex-wrap">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={!!m.read}
+                        onCheckedChange={() => handleToggle(m.id, "read")}
+                      />
+                      Read
+                    </label>
 
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-6">
-                      <label className="flex items-center gap-2 text-sm">
-                        <Checkbox
-                          checked={!!m.read}
-                          onCheckedChange={() => handleToggle(m.id, "read")}
-                        />
-                        Read
-                      </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={!!m.write}
+                        onCheckedChange={() => handleToggle(m.id, "write")}
+                      />
+                      Write
+                    </label>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-                      <label className="flex items-center gap-2 text-sm">
-                        <Checkbox
-                          checked={!!m.write}
-                          onCheckedChange={() => handleToggle(m.id, "write")}
-                        />
-                        Write
-                      </label>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
+      {/* Footer */}
+      <div className="p-4 border-t flex flex-wrap justify-end gap-2">
+        <Button variant="outline" onClick={() => setModules(initialModules)}>
+          Reset
+        </Button>
+        <Button onClick={handleSave}>Save Permissions</Button>
+      </div>
 
-        <div className="p-4 border-t flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setModules(initialModules)}>
-            Reset
-          </Button>
-          <Button onClick={handleSave}>Save Permissions</Button>
-        </div>
-      </Card>
+      {/* Custom Scrollbar Style */}
+      <style jsx>{`
+        .custom-scroll::-webkit-scrollbar {
+          height: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+          background-color: #d1d5db;
+          border-radius: 9999px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+          background-color: #9ca3af;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+          background: #f9fafb;
+        }
+      `}</style>
     </div>
   )
 }
