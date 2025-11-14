@@ -1,19 +1,25 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useState } from 'react';
 
 export default function Dashboard() {
   const [open, setOpen] = useState(false);
@@ -22,36 +28,58 @@ export default function Dashboard() {
   const products = [
     {
       id: 1,
-      image: "/images/box.png",
-      name: "Wireless Mouse",
-      category: "Accessories",
+      image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
+      name: 'Wireless Mouse',
+      category: 'Accessories',
       stock: 120,
       buyingPrice: 900,
       sellingPrice: 1200,
-      supplier: "LogiTech",
-      status: "In Stock",
+      supplier: 'LogiTech',
+      status: 'In Stock',
     },
     {
       id: 2,
-      image: "/images/box.png",
-      name: "Bluetooth Keyboard",
-      category: "Accessories",
+      image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
+      name: 'Bluetooth Keyboard',
+      category: 'Accessories',
       stock: 80,
       buyingPrice: 1100,
       sellingPrice: 1500,
-      supplier: "KeyPro",
-      status: "Low Stock",
+      supplier: 'KeyPro',
+      status: 'Low Stock',
     },
     {
       id: 3,
-      image: "/images/box.png",
-      name: "USB-C Hub",
-      category: "Electronics",
+      image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
+      name: 'USB-C Hub',
+      category: 'Electronics',
       stock: 0,
       buyingPrice: 1400,
       sellingPrice: 1800,
-      supplier: "Kingpark",
-      status: "Out of Stock",
+      supplier: 'Kingpark',
+      status: 'Out of Stock',
+    },
+    {
+      id: 4,
+      image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
+      name: 'USB-C Hub',
+      category: 'Electronics',
+      stock: 0,
+      buyingPrice: 1400,
+      sellingPrice: 1800,
+      supplier: 'Kingpark',
+      status: 'Out of Stock',
+    },
+    {
+      id: 5,
+      image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
+      name: 'USB-C Hub',
+      category: 'Electronics',
+      stock: 0,
+      buyingPrice: 1400,
+      sellingPrice: 1800,
+      supplier: 'Kingpark',
+      status: 'Out of Stock',
     },
   ];
 
@@ -63,21 +91,27 @@ export default function Dashboard() {
   return (
     <div className=" space-y-6">
       {/* ---------- Top 3 Summary Cards ---------- */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border rounded-lg shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Total Paid</CardDescription>
-            <CardTitle className="text-2xl font-semibold">Rs. 125,000</CardTitle>
+            <CardTitle className="text-2xl font-semibold">Rs. 125K</CardTitle>
           </CardHeader>
         </Card>
 
         <Card className="border rounded-lg shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Total Due</CardDescription>
-            <CardTitle className="text-2xl font-semibold">Rs. 85,000</CardTitle>
+            <CardTitle className="text-2xl font-semibold">Rs. 85K</CardTitle>
           </CardHeader>
         </Card>
 
+        <Card className="border rounded-lg shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>Complete Orders</CardDescription>
+            <CardTitle className="text-2xl font-semibold">4.5%</CardTitle>
+          </CardHeader>
+        </Card>
         <Card className="border rounded-lg shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Complete Orders</CardDescription>
@@ -88,8 +122,10 @@ export default function Dashboard() {
 
       {/* ---------- Product Table ---------- */}
       <Card className="border rounded-lg shadow-sm">
-        <CardHeader className="flex items-center justify-between border-b py-2">
-          <CardTitle className="text-base font-semibold">New Products</CardTitle>
+        <CardHeader className="flex items-center justify-between border-b">
+          <CardTitle className="text-base font-semibold">
+            New Products
+          </CardTitle>
           <Link href="/products">
             <Button size="sm" variant="outline">
               View All
@@ -97,50 +133,53 @@ export default function Dashboard() {
           </Link>
         </CardHeader>
 
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 text-sm">
-              <thead className="bg-gray-50">
+        <CardContent>
+          <div className="overflow-x-auto table_scroll">
+            <table className="border">
+              <thead className="border">
                 <tr>
-                  <th className="border px-3 py-2 text-left">Image</th>
-                  <th className="border px-3 py-2 text-left">Product</th>
-                  <th className="border px-3 py-2 text-left">Category</th>
-                  <th className="border px-3 py-2 text-left">Stock</th>
-                  <th className="border px-3 py-2 text-left">Price</th>
-                  <th className="border px-3 py-2 text-left">Status</th>
-                  <th className="border px-3 py-2 text-center">Actions</th>
+                  <th>
+                    <p className="flex justify-center items-center">Image</p>
+                  </th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Stock</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>
+                    <p className="flex justify-center items-center">Action</p>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {products.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50">
-                    <td className="border px-3 py-2">
+                  <tr key={p.id} className="border">
+                    <td>
                       <Image
                         src={p.image}
                         alt={p.name}
                         width={40}
                         height={40}
-                        className="rounded-md"
                       />
                     </td>
-                    <td className="border px-3 py-2">{p.name}</td>
-                    <td className="border px-3 py-2">{p.category}</td>
-                    <td className="border px-3 py-2">{p.stock}</td>
-                    <td className="border px-3 py-2">Rs. {p.sellingPrice}</td>
-                    <td className="border px-3 py-2">
+                    <td>{p.name}</td>
+                    <td>{p.category}</td>
+                    <td>{p.stock}</td>
+                    <td>Rs. {p.sellingPrice}</td>
+                    <td>
                       <span
                         className={`px-2 py-1 rounded text-xs border ${
-                          p.status === "In Stock"
-                            ? "text-green-600 border-green-600"
-                            : p.status === "Low Stock"
-                            ? "text-yellow-600 border-yellow-600"
-                            : "text-red-600 border-red-600"
+                          p.status === 'In Stock'
+                            ? 'text-green-600 border-green-600'
+                            : p.status === 'Low Stock'
+                            ? 'text-yellow-600 border-yellow-600'
+                            : 'text-red-600 border-red-600'
                         }`}
                       >
                         {p.status}
                       </span>
                     </td>
-                    <td className="border px-3 py-2 text-center">
+                    <td>
                       <Button
                         size="sm"
                         variant="outline"
@@ -172,40 +211,46 @@ export default function Dashboard() {
                   alt={selectedProduct.name}
                   width={100}
                   height={100}
-                  className="rounded-md mb-2 border"
+                  className="rounded-md mb-2"
                 />
                 <Input type="file" accept="image/*" className="w-full" />
               </div>
 
               <div>
-                <Label>Product Name *</Label>
+                <Label className="mb-2">Product Name *</Label>
                 <Input defaultValue={selectedProduct.name} />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2">
                 <div>
-                  <Label>Category *</Label>
+                  <Label className="mb-2">Category *</Label>
                   <Input defaultValue={selectedProduct.category} />
                 </div>
                 <div>
-                  <Label>Supplier *</Label>
+                  <Label className="mb-2">Supplier *</Label>
                   <Input defaultValue={selectedProduct.supplier} />
                 </div>
               </div>
 
               <div>
-                <Label>Stock *</Label>
+                <Label className="mb-2">Stock *</Label>
                 <Input type="number" defaultValue={selectedProduct.stock} />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Buying Price *</Label>
-                  <Input type="number" defaultValue={selectedProduct.buyingPrice} />
+                  <Label className="mb-2">Buying Price *</Label>
+                  <Input
+                    type="number"
+                    defaultValue={selectedProduct.buyingPrice}
+                  />
                 </div>
                 <div>
-                  <Label>Selling Price *</Label>
-                  <Input type="number" defaultValue={selectedProduct.sellingPrice} />
+                  <Label className="mb-2">Selling Price *</Label>
+                  <Input
+                    type="number"
+                    defaultValue={selectedProduct.sellingPrice}
+                  />
                 </div>
               </div>
 

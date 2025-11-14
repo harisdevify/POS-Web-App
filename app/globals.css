@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -119,4 +119,59 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* table globle css */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem; /* small text */
+}
+
+/* Table headers */
+table th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+/* Table cells */
+table td {
+  padding: 0.5rem 0.75rem;
+  vertical-align: middle; /* centers content vertically */
+  text-align: left; /* default left */
+  min-width: 150px;
+}
+
+/* Centered cells (for images or buttons) */
+table td img,
+table td button {
+  display: block;
+  margin: 0 auto; /* horizontal center */
+}
+
+/* scroll bar */
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+.body::-webkit-scrollbar,
+.table_scroll::-webkit-scrollbar {
+  height: 6px;
+  width: 5px;
+}
+
+.body::-webkit-scrollbar-track,
+.table_scroll::-webkit-scrollbar-track {
+  background: transparent; /* light gray track */
+  border-radius: 6px;
+}
+
+.body::-webkit-scrollbar-thumb,
+.table_scroll::-webkit-scrollbar-thumb {
+  background: #aaaaaa; /* medium gray thumb */
+  border-radius: 6px;
+}
+
+.body::-webkit-scrollbar-thumb:hover,
+.table_scroll::-webkit-scrollbar-thumb:hover {
+  background: #555; /* darker gray on hover */
 }
