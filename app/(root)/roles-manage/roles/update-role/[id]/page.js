@@ -1,61 +1,70 @@
-"use client"
-import React, { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useState } from 'react';
 
 const UpdateRole = () => {
-  const [roleName, setRoleName] = useState("Admin")
+  const [roleName, setRoleName] = useState('Dashboard');
 
   const modules = [
-    "Dashboard",
-    "Users",
-    "Roles",
-    "Products",
-    "Orders",
-    "Reports",
-  ]
+    'Dashboard',
+    'Users',
+    'Roles',
+    'Products',
+    'Orders',
+    'Reports',
+  ];
 
   return (
-    <div className="">
+    <div>
       <Card className="shadow-md border rounded-xl">
         <CardHeader className="border-b">
           <CardTitle className="text-lg font-medium">Update Role</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Role Name Input */}
+          {/* Role Name */}
           <div>
             <label className="block mb-2 text-sm font-medium">Role Name</label>
-            <input
+            <Input
               type="text"
               value={roleName}
               onChange={(e) => setRoleName(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-indigo-500"
               placeholder="Enter Role Name"
             />
           </div>
 
           {/* Permissions Table */}
-          <div className="overflow-x-auto">
-            <table className="min-w-[500px] w-full border-collapse text-sm">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto table_scroll">
+            <table>
+              <thead>
                 <tr>
-                  <th className="border px-3 py-2 text-left w-1/2">Module</th>
-                  <th className="border px-3 py-2 text-left">Permissions</th>
+                  <th>Module</th>
+                  <th>Permissions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {modules.map((module, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="border px-3 py-2">{module}</td>
-                    <td className="border px-3 py-2">
-                      <div className="flex items-center gap-4">
-                        <label className="flex items-center gap-1 text-sm">
-                          <input type="checkbox" /> Read
-                        </label>
-                        <label className="flex items-center gap-1 text-sm">
-                          <input type="checkbox" /> Write
-                        </label>
+                  <tr key={index}>
+                    <td>{module}</td>
+                    <td>
+                      <div className="flex items-center gap-6 justify-start">
+                        {/* Read */}
+                        <div className="flex items-center gap-2">
+                          <Checkbox className="cursor-pointer" />
+                          <Label className="text-sm select-none">Read</Label>
+                        </div>
+
+                        {/* Write */}
+                        <div className="flex items-center gap-2">
+                          <Checkbox className="cursor-pointer" />
+                          <Label className="text-sm select-none">Write</Label>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -64,14 +73,14 @@ const UpdateRole = () => {
             </table>
           </div>
 
-          {/* Save Button */}
+          {/* Save */}
           <div className="flex justify-end">
             <Button variant="outline">Save Changes</Button>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default UpdateRole
+export default UpdateRole;

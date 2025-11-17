@@ -1,8 +1,7 @@
-"use client"
+'use client';
 
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { ModeToggle } from "@/components/mode-toogle"
-import Link from "next/link"
+import { ModeToggle } from '@/components/mode-toogle';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 const Header = () => {
   return (
@@ -11,7 +10,7 @@ const Header = () => {
       <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-start">
         <div className="flex items-center gap-2">
           <SidebarTrigger />
-          <h1 className="text-base sm:text-lg font-semibold">Hello Header</h1>
+          <h1 className="text-base sm:text-lg font-semibold">Dashboard</h1>
         </div>
 
         {/* 👇 Small screen right icons */}
@@ -25,7 +24,7 @@ const Header = () => {
         <ModeToggle />
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

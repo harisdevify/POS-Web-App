@@ -87,37 +87,31 @@ export default function Dashboard() {
     setSelectedProduct(product);
     setOpen(true);
   };
+  const stats = [
+    { label: 'Total Paid', value: 'Rs. 125K' },
+    { label: 'Total Due', value: 'Rs. 85K' },
+    { label: 'Complete Orders', value: '4.5%' },
+    { label: 'Pending Orders', value: '4.5%' },
+  ];
 
   return (
-    <div className=" space-y-6">
-      {/* ---------- Top 3 Summary Cards ---------- */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border rounded-lg shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription>Total Paid</CardDescription>
-            <CardTitle className="text-2xl font-semibold">Rs. 125K</CardTitle>
-          </CardHeader>
-        </Card>
-
-        <Card className="border rounded-lg shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription>Total Due</CardDescription>
-            <CardTitle className="text-2xl font-semibold">Rs. 85K</CardTitle>
-          </CardHeader>
-        </Card>
-
-        <Card className="border rounded-lg shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription>Complete Orders</CardDescription>
-            <CardTitle className="text-2xl font-semibold">4.5%</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card className="border rounded-lg shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription>Complete Orders</CardDescription>
-            <CardTitle className="text-2xl font-semibold">4.5%</CardTitle>
-          </CardHeader>
-        </Card>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((item, index) => (
+          <Card
+            key={index}
+            className="rounded-xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+          >
+            <CardHeader className="pb-4 space-y-1">
+              <CardDescription className="text-sm tracking-wide">
+                {item.label}
+              </CardDescription>
+              <CardTitle className="text-3xl font-semibold tracking-tight">
+                {item.value}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        ))}
       </div>
 
       {/* ---------- Product Table ---------- */}
@@ -135,8 +129,8 @@ export default function Dashboard() {
 
         <CardContent>
           <div className="overflow-x-auto table_scroll">
-            <table className="border">
-              <thead className="border">
+            <table>
+              <thead>
                 <tr>
                   <th>
                     <p className="flex justify-center items-center">Image</p>
@@ -153,7 +147,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {products.map((p) => (
-                  <tr key={p.id} className="border">
+                  <tr key={p.id}>
                     <td>
                       <Image
                         src={p.image}

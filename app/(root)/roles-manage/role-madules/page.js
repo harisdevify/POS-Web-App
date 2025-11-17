@@ -1,108 +1,143 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Eye, Edit } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Edit, Plus } from 'lucide-react';
+import { useState } from 'react';
 
 const initialRoles = [
-  { id: 1, name: "Dashboard Access" },
-  { id: 2, name: "Product Management" },
-  { id: 3, name: "Sales Reports" },
-  { id: 4, name: "Customer Records" },
-  { id: 5, name: "Inventory Control" },
-]
+  { id: 1, name: 'Dashboard Access' },
+  { id: 2, name: 'Product Management' },
+  { id: 3, name: 'Sales Reports' },
+  { id: 4, name: 'Customer Records' },
+  { id: 5, name: 'Inventory Control' },
+];
 
-export default function RolesMadules() {
-  const [roles, setRoles] = useState(initialRoles)
-  const [selectedRole, setSelectedRole] = useState(null)
-  const [editing, setEditing] = useState(null)
+export default function RolesModules() {
+  const [roles, setRoles] = useState(initialRoles);
 
-  const handleEdit = (role) => setEditing(role)
-  const handleView = (role) => setSelectedRole(role)
+  const [editing, setEditing] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const [newModuleName, setNewModuleName] = useState('');
 
-  const handleSave = () => {
-    setRoles((prev) =>
-      prev.map((r) => (r.id === editing.id ? editing : r))
-    )
-    setEditing(null)
-  }
+  // Edit
+  const handleEdit = (role) => setEditing(role);
+
+  const handleSaveEdit = () => {
+    setRoles((prev) => prev.map((r) => (r.id === editing.id ? editing : r)));
+    setEditing(null);
+  };
+
+  // Add
+  const handleAddModule = () => {
+    if (!newModuleName.trim()) return;
+
+    const newModule = {
+      id: roles.length ? roles[roles.length - 1].id + 1 : 1,
+      name: newModuleName,
+    };
+
+    setRoles((prev) => [...prev, newModule]);
+    setNewModuleName('');
+    setAdding(false);
+  };
 
   return (
-    <div className="overflow-hidden rounded-md border">
-      {/* Heading Section */}
-      <div className="px-4 py-2 text-base font-semibold border-b bg-white">
-        Role Modules
-      </div>
+    <Card className="overflow-hidden rounded-md border">
+      <CardHeader className="border-b flex justify-between items-center">
+        <CardTitle className="text-lg font-medium">Role Modules</CardTitle>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse bg-white">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border text-center w-16">No.</th>
-              <th className="py-2 px-4 border text-left">Name</th>
-              <th className="py-2 px-4 border text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {roles.map((role, idx) => (
-              <tr key={role.id}>
-                <td className="py-2 px-4 border text-center">{idx + 1}</td>
-                <td className="py-2 px-4 border">{role.name}</td>
-                <td className="py-2 px-4 border text-center">
-                  <div className="flex justify-center gap-2">
-                    <Button
+        {/* Add Button */}
+        <button
+          onClick={() => setAdding(true)}
+          size="icon"
+          className="button-relative group"
+        >
+          <span className="button-absolute group-hover:opacity-0">Add</span>
+          <Plus
+            size={18}
+            className="btn-icon-absolute group-hover:opacity-100 group-hover:scale-110 group-hover:text-green-500"
+          />
+        </button>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        <div className="overflow-x-auto table_scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Name</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {roles.map((role, idx) => (
+                <tr key={role.id}>
+                  <td>{idx + 1}</td>
+                  <td>{role.name}</td>
+                  <td>
+                    <button
                       size="icon"
-                      variant="ghost"
-                      className="border p-1 hover:bg-gray-100"
-                      onClick={() => handleView(role)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="border p-1 hover:bg-gray-100"
+                      className="button-relative group"
                       onClick={() => handleEdit(role)}
                     >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                      <span className="button-absolute group-hover:opacity-0">
+                        Edit
+                      </span>
+                      <Edit
+                        size={18}
+                        className="btn-icon-absolute group-hover:opacity-100 group-hover:scale-110 group-hover:text-sky-500"
+                      />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
 
-      {/* View Dialog */}
-      <Dialog open={!!selectedRole} onOpenChange={() => setSelectedRole(null)}>
+      {/* ------------------- ADD NEW MODULE ------------------- */}
+      <Dialog open={adding} onOpenChange={() => setAdding(false)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>View Role Module</DialogTitle>
+            <DialogTitle>Add New Module</DialogTitle>
           </DialogHeader>
-          {selectedRole && (
-            <div className="py-2 space-y-1">
-              <p><strong>ID:</strong> {selectedRole.id}</p>
-              <p><strong>Name:</strong> {selectedRole.name}</p>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedRole(null)}>Close</Button>
+
+          <div className="space-y-3 pt-2">
+            <Input
+              value={newModuleName}
+              onChange={(e) => setNewModuleName(e.target.value)}
+              placeholder="Enter module name"
+            />
+          </div>
+
+          <DialogFooter className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setAdding(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddModule}>Add Module</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
+      {/* ------------------- EDIT MODULE ------------------- */}
       <Dialog open={!!editing} onOpenChange={() => setEditing(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Role Module</DialogTitle>
+            <DialogTitle>Edit Module</DialogTitle>
           </DialogHeader>
+
           {editing && (
             <div className="space-y-3">
               <Input
@@ -114,14 +149,15 @@ export default function RolesMadules() {
               />
             </div>
           )}
+
           <DialogFooter className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setEditing(null)}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save Changes</Button>
+            <Button onClick={handleSaveEdit}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  )
+    </Card>
+  );
 }

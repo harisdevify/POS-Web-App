@@ -30,7 +30,9 @@ const data = {
     email: 'tayyabdevify@gmail.com',
     avatar: '/table.jpg',
   },
+
   teams: [{ name: 'POS', logo: GalleryVerticalEnd, plan: 'Web App' }],
+
   pages: [
     {
       title: 'POS',
@@ -38,12 +40,12 @@ const data = {
       icon: Warehouse,
     },
     {
-      title: 'Roles Manage',
+      title: 'Roles Management',
       icon: BookOpenText,
       items: [
         { title: 'Roles', url: '/roles-manage/roles' },
+        { title: 'Assign Role', url: '/roles-manage/assign-role' },
         { title: 'Role Madules', url: '/roles-manage/role-madules' },
-        { title: 'Assign Roles', url: '/roles-manage/assign-roles' },
         { title: 'All Staff', url: '/roles-manage/all-staff' },
       ],
     },
@@ -102,7 +104,7 @@ export function AppSidebar(props) {
         </Link>
 
         {/* Divider */}
-        <div className="my-2 border-t border-border" />
+        <div className="border-t" />
 
         {/* Pages */}
         {data.pages.map((page) => (

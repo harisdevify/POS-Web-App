@@ -3,10 +3,16 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-
 const productsData = [
   {
     id: 1,
@@ -73,6 +79,12 @@ export default function Pos() {
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const smallCards = [
+    { lable: 'Quantity', score: '0' },
+    { lable: 'Subtotal', score: '0' },
+    { lable: 'Total', score: '0' },
+  ];
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* ---------- LEFT: POS Cart Table ---------- */}
@@ -83,44 +95,54 @@ export default function Pos() {
 
         <CardContent>
           <div className="overflow-x-auto table_scroll">
-            <table className="border">
-              <thead className="border">
+            <table>
+              <thead>
                 <tr>
                   <th>Name</th>
                   <th>Qty</th>
                   <th>Price</th>
                   <th>Subtotal</th>
-                  <th>Action</th>
+                  <th>
+                    <p className="flex justify-center items-center">Action</p>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {cart.map((item) => (
-                  <tr key={item.id} className="border">
-                    <td>{item.name}</td>
-                    <td>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.qty}
-                        onChange={(e) => updateQty(item.id, e.target.value)}
-                        className="w-16 text-center"
-                      />
-                    </td>
-                    <td>{item.price}</td>
-                    <td>{item.qty * item.price}</td>
-                    <td>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => removeFromCart(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                {cart.length > 0 ? (
+                  cart.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.name}</td>
+                      <td>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={item.qty}
+                          onChange={(e) => updateQty(item.id, e.target.value)}
+                          className="w-16 text-center"
+                        />
+                      </td>
+                      <td>{item.price}</td>
+                      <td>{item.qty * item.price}</td>
+                      <td className="text-center">
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="button-relative group"
+                        >
+                          {/* Default text */}
+                          <span className="button-absolute group-hover:opacity-0">
+                            Delete
+                          </span>
 
-                {cart.length === 0 && (
+                          {/* Icon appears on hover */}
+                          <Trash2
+                            size={18}
+                            className="btn-icon-absolute group-hover:opacity-100 group-hover:scale-110 group-hover:text-red-500"
+                          />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
                   <tr>
                     <td colSpan="5" className="text-center">
                       No items in cart.
@@ -129,6 +151,41 @@ export default function Pos() {
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+            {smallCards.map((card, i) => {
+              return (
+                <div
+                  key={i}
+                  className="border border-border rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-shadow duration-300"
+                >
+                  <p className="text-sm font-medium">{card.lable}</p>
+                  <span className="text-xl font-semibold">{card.score}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 flex justify-end w-full">
+            <Select onValueChange={(value) => console.log('Selected:', value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Customer" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="applyDiscount">Apply Discount</SelectItem>
+                <SelectItem value="clearCart">Clear Cart</SelectItem>
+                <SelectItem value="checkout">Checkout</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-1 w-full mt-4">
+            <Button size="sm" variant="outline" className="cursor-pointer">
+              Add Customer
+            </Button>
+            <Button size="sm" variant="outline" className="cursor-pointer">
+              Create Invoice
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -148,8 +205,8 @@ export default function Pos() {
         </CardHeader>{' '}
         <CardContent>
           <div className="overflow-x-auto table_scroll">
-            <table className="border">
-              <thead className="border">
+            <table>
+              <thead>
                 <tr>
                   <th>Photo</th>
                   <th>Name</th>
@@ -160,26 +217,34 @@ export default function Pos() {
               <tbody>
                 {filteredProducts.length > 0 ? (
                   filteredProducts.map((product) => (
-                    <tr key={product.id} className="border">
+                    <tr key={product.id}>
                       <td>
                         <Image
                           src={product.image}
                           alt={product.name}
-                          width={50}
-                          height={50}
+                          width={40}
+                          height={40}
                           className="rounded-md"
                         />
                       </td>
                       <td>{product.name}</td>
                       <td>{product.price}</td>
-                      <td>
-                        <Button
-                          size="icon"
-                          className="bg-green-600 hover:bg-green-700"
+                      <td className="text-center">
+                        <button
                           onClick={() => addToCart(product)}
+                          className="button-relative group"
                         >
-                          <Plus className="h-4 w-4 text-white" />
-                        </Button>
+                          {/* Default text */}
+                          <span className="button-absolute group-hover:opacity-0">
+                            Add
+                          </span>
+
+                          {/* Icon appears on hover */}
+                          <Plus
+                            size={18}
+                            className="btn-icon-absolute group-hover:opacity-100 group-hover:scale-110 group-hover:text-green-600"
+                          />
+                        </button>
                       </td>
                     </tr>
                   ))
