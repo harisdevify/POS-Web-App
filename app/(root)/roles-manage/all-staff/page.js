@@ -66,30 +66,32 @@ const AllStaff = () => {
         </CardHeader>
 
         {/* Table */}
-        <CardContent className="overflow-x-auto table_scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>User Type</th>
-                <th>Address</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {data.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.name}</td>
-                  <td>{item.email}</td>
-                  <td>{item.phone}</td>
-                  <td>{item.userType}</td>
-                  <td>{item.address}</td>
+        <CardContent>
+          <div className="overflow-x-auto table_scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>User Type</th>
+                  <th>Address</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {data.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.name}</td>
+                    <td>{item.email}</td>
+                    <td>{item.phone}</td>
+                    <td>{item.userType}</td>
+                    <td>{item.address}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
 
