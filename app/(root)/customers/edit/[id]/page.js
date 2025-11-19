@@ -37,21 +37,21 @@ export default function EditCustomer() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Avatar + Upload */}
-            <div className="flex flex-col items-start gap-6 mb-3">
+            <div className="flex items-center gap-6">
               <div className="w-20 h-20 rounded-full overflow-hidden border">
                 <Image
                   src="/table.jpg"
                   width={80}
                   height={80}
-                  alt="Customer"
+                  alt="User"
                   className="object-cover"
                 />
               </div>
 
               <Input
                 type="file"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="max-w-md"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                className="max-w-xs"
               />
             </div>
 

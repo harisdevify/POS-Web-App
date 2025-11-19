@@ -192,10 +192,8 @@ export default function Pos() {
 
       {/* ---------- RIGHT: Products Table ---------- */}
       <Card className="border shadow-md rounded-xl">
-        <CardHeader className="flex justify-between items-center w-full">
-          <CardTitle className="text-lg font-medium w-1/2">
-            Products List
-          </CardTitle>
+        <CardHeader className="border-b flex justify-between items-center">
+          <CardTitle className="text-lg font-medium">Products List</CardTitle>
           <Input
             placeholder="Search product..."
             value={search}
@@ -208,10 +206,14 @@ export default function Pos() {
             <table>
               <thead>
                 <tr>
-                  <th>Photo</th>
+                  <th>
+                    <p className="flex justify-center items-center">Photo</p>
+                  </th>
                   <th>Name</th>
                   <th>Price</th>
-                  <th>Action</th>
+                  <th>
+                    <p className="flex justify-center items-center">Action</p>
+                  </th>
                 </tr>
               </thead>
               <tbody>

@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DollarSign, ShoppingBag, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -88,27 +89,32 @@ export default function Dashboard() {
     setOpen(true);
   };
   const stats = [
-    { label: 'Total Paid', value: 'Rs. 125K' },
-    { label: 'Total Due', value: 'Rs. 85K' },
-    { label: 'Complete Orders', value: '4.5%' },
-    { label: 'Pending Orders', value: '4.5%' },
+    { label: 'Total Users', value: '1,204', icon: <User size={22} /> },
+    { label: 'Revenue', value: '$32,100', icon: <DollarSign size={22} /> },
+    { label: 'Orders', value: '458', icon: <ShoppingBag size={22} /> },
   ];
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((item, index) => (
           <Card
             key={index}
-            className="rounded-xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            className="rounded-2xl p-4 border shadow-sm hover:shadow-md transition-all duration-300"
           >
-            <CardHeader className="pb-4 space-y-1">
-              <CardDescription className="text-sm tracking-wide">
-                {item.label}
-              </CardDescription>
-              <CardTitle className="text-3xl font-semibold tracking-tight">
-                {item.value}
-              </CardTitle>
+            <CardHeader className="p-0 flex flex-row items-center justify-between">
+              <div>
+                <CardDescription className="text-xs font-medium ">
+                  {item.label}
+                </CardDescription>
+
+                <CardTitle className="text-3xl font-bold mt-1">
+                  {item.value}
+                </CardTitle>
+              </div>
+
+              {/* Optional icon */}
+              {item.icon && <div className="p-3 rounded-lg">{item.icon}</div>}
             </CardHeader>
           </Card>
         ))}

@@ -1,149 +1,114 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Edit, Trash2 } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Edit, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 
 const initialCategories = [
-  { id: 1, name: "Gas Cylinder", slug: "gas-cylinder" },
-  { id: 2, name: "Industrial Equipment", slug: "industrial-equipment" },
-  { id: 3, name: "Accessories", slug: "accessories" },
-]
+  {
+    id: 1,
+    name: 'Gas Cylinder',
+    subCategory: 'lights',
+    date: '01-01-2025',
+    status: 'active',
+  },
+  {
+    id: 2,
+    name: 'Industrial Equipment',
+    subCategory: 'lights',
+    date: '01-01-2025',
+    status: 'active',
+  },
+  {
+    id: 3,
+    name: 'Accessories',
+    subCategory: 'lights',
+    date: '01-01-2025',
+    status: 'active',
+  },
+];
 
 export default function Categories() {
-  const [categories, setCategories] = useState(initialCategories)
-  const [editing, setEditing] = useState(null)
-
-  const handleDelete = (id) => {
-    setCategories(categories.filter((cat) => cat.id !== id))
-  }
-
-  const handleEdit = (category) => {
-    setEditing(category)
-  }
-
-  const handleSave = () => {
-    setCategories(
-      categories.map((cat) => (cat.id === editing.id ? editing : cat))
-    )
-    setEditing(null)
-  }
+  const [categories, setCategories] = useState(initialCategories);
 
   return (
-    <div className="p-4">
-      {/* 🔹 Card Container */}
+    <div>
       <Card className="shadow-md rounded-xl border">
-        {/* 🔸 Header same as Products Overview */}
-        <CardHeader className="bg-muted/40 border-b rounded-t-xl">
-          <CardTitle className="text-lg font-medium">
-            Categories Overview
-          </CardTitle>
+        <CardHeader className="border-b rounded-t-xl flex justify-between items-center">
+          <CardTitle className="text-lg font-medium">Categories</CardTitle>
+          <div className="flex justify-center items-center gap-2">
+            <Input placeholder="Search User..." className="h-8 w-48" />
+            <Link
+              href="/products/categories/add"
+              className="button-relative group "
+            >
+              <span className="button-absolute group-hover:opacity-0">Add</span>
+              <Plus
+                size={18}
+                className="btn-icon-absolute group-hover:opacity-100 group-hover:scale-110 group-hover:text-green-500"
+              />
+            </Link>
+          </div>
         </CardHeader>
 
-        {/* 🔸 Table Section */}
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12 text-center">No.</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead className="text-center">Action</TableHead>
-              </TableRow>
-            </TableHeader>
+        <CardContent>
+          <div className="overflow-x-auto table_scroll">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 border-b">
+                    <p className="flex justify-center items-center">Action</p>
+                  </th>
+                  <th className="px-4 py-2 border-b">Category</th>
+                  <th className="px-4 py-2 border-b">Status</th>
+                  <th className="px-4 py-2 border-b">Date/Time</th>
+                </tr>
+              </thead>
 
-            <TableBody>
-              {categories.map((cat, index) => (
-                <TableRow key={cat.id} className="hover:bg-muted/30">
-                  <TableCell className="text-center">{index + 1}</TableCell>
-                  <TableCell className="font-medium">{cat.name}</TableCell>
-                  <TableCell>{cat.slug}</TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => handleEdit(cat)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => handleDelete(cat.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {categories.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="text-center py-6 text-muted-foreground"
-                  >
-                    No categories available.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              <tbody>
+                {categories.length > 0 ? (
+                  categories.map((cat) => (
+                    <tr key={cat.id} className="border-b">
+                      <td className="px-4 py-2">
+                        <div className="flex justify-center items-center">
+                          <Link
+                            href={`/products/categories/edit/${cat.id}`}
+                            variant="outline"
+                            className="button-relative group"
+                          >
+                            <span className="button-absolute group-hover:opacity-0">
+                              Edit
+                            </span>
+                            <Edit
+                              size={18}
+                              className="btn-icon-absolute group-hover:opacity-100 group-hover:scale-110 group-hover:text-sky-500"
+                            />
+                          </Link>
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-2">{cat.name}</td>
+                      <td className="px-4 py-2">{cat.status}</td>
+                      <td className="px-4 py-2">{cat.date}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="text-center py-6 text-muted-foreground"
+                    >
+                      No categories available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
-
-      {/* 🔹 Edit Dialog */}
-      <Dialog open={!!editing} onOpenChange={() => setEditing(null)}>
-        <DialogContent className="sm:max-w-3xl sm:max-h-3xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
-          </DialogHeader>
-
-          {editing && (
-            <div className="grid gap-3 py-2">
-              <Input
-                value={editing.name}
-                onChange={(e) =>
-                  setEditing({ ...editing, name: e.target.value })
-                }
-                placeholder="Category Name"
-              />
-              <Input
-                value={editing.slug}
-                onChange={(e) =>
-                  setEditing({ ...editing, slug: e.target.value })
-                }
-                placeholder="Slug"
-              />
-            </div>
-          )}
-
-          <DialogFooter className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setEditing(null)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
-  )
+  );
 }

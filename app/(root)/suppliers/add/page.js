@@ -15,8 +15,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import Link from 'next/link';
 
-export default function AddCustomer() {
+export default function AddSuppliers() {
   const [file, setFile] = useState(null);
 
   // React Hook Form
@@ -31,7 +32,7 @@ export default function AddCustomer() {
     <div>
       <Card className="border shadow-sm rounded-lg">
         <CardHeader className="border-b">
-          <CardTitle>Add Customer</CardTitle>
+          <CardTitle>Add Supplier</CardTitle>
         </CardHeader>
 
         <CardContent>
@@ -57,28 +58,31 @@ export default function AddCustomer() {
 
             {/* Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Customer Name */}
+              {/* Supplier Name */}
               <div>
-                <label className="text-sm font-medium">Customer Name *</label>
+                <label className="text-sm font-medium">Supplier Name *</label>
                 <Input
-                  placeholder="Enter customer name"
-                  {...register('customerName', { required: true })}
+                  placeholder="Enter supplier name"
+                  {...register('supplierName', { required: true })}
                 />
               </div>
 
-              {/* Phone */}
+              {/* Supplier Phone */}
               <div>
-                <label className="text-sm font-medium">Customer Phone *</label>
+                <label className="text-sm font-medium">Supplier Phone *</label>
                 <Input
                   placeholder="Enter phone number"
-                  {...register('phone', { required: true })}
+                  {...register('supplierPhone', { required: true })}
                 />
               </div>
 
-              {/* Email */}
+              {/* Supplier Email */}
               <div>
-                <label className="text-sm font-medium">Customer Email</label>
-                <Input placeholder="email@example.com" {...register('email')} />
+                <label className="text-sm font-medium">Supplier Email</label>
+                <Input
+                  placeholder="email@example.com"
+                  {...register('supplierEmail')}
+                />
               </div>
 
               {/* Shop Name */}
@@ -103,8 +107,8 @@ export default function AddCustomer() {
               <div>
                 <label className="text-sm font-medium">Bank Name</label>
                 <Select
-                  onValueChange={(v) => setValue('bank', v)}
-                  defaultValue={watch('bank')}
+                  onValueChange={(v) => setValue('bankName', v)}
+                  defaultValue={watch('bankName')}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select Bank" />
@@ -133,12 +137,12 @@ export default function AddCustomer() {
                 <Input placeholder="Bank Branch" {...register('bankBranch')} />
               </div>
 
-              {/* Customer City */}
+              {/* Supplier City */}
               <div>
-                <label className="text-sm font-medium">Customer City *</label>
+                <label className="text-sm font-medium">Supplier City *</label>
                 <Select
-                  onValueChange={(v) => setValue('city', v)}
-                  defaultValue={watch('city')}
+                  onValueChange={(v) => setValue('supplierCity', v)}
+                  defaultValue={watch('supplierCity')}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select City" />
@@ -151,22 +155,45 @@ export default function AddCustomer() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Type of Supplier */}
+              <div>
+                <label className="text-sm font-medium">
+                  Type of Supplier *
+                </label>
+                <Select
+                  onValueChange={(v) => setValue('supplierType', v)}
+                  defaultValue={watch('supplierType')}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="whole-seller">Whole Seller</SelectItem>
+                    <SelectItem value="retailer">Retailer</SelectItem>
+                    <SelectItem value="distributor">Distributor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Address */}
+            {/* Supplier Address */}
             <div className="flex flex-col pt-2">
-              <label className="text-sm font-medium">Customer Address</label>
+              <label className="text-sm font-medium">Supplier Address</label>
               <Textarea
                 placeholder="Enter full address..."
-                {...register('address')}
+                {...register('supplierAddress')}
               />
             </div>
 
             {/* Buttons */}
             <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline">
-                Cancel
+              <Button variant="outline">
+                <Link href="/suppliers" variant="outline">
+                  Cancel
+                </Link>
               </Button>
+
               <Button type="submit">Update</Button>
             </div>
           </form>

@@ -54,8 +54,8 @@ const data = {
       icon: NotebookPen,
       items: [
         { title: 'Products', url: '/products' },
-        { title: 'Add Product', url: '/products/add-product' },
         { title: 'Categories', url: '/products/categories' },
+        { title: 'Sub Categories', url: '/products/subcategories' },
       ],
     },
     {
