@@ -2,53 +2,30 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Plus, Trash2 } from 'lucide-react';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { Check, ChevronsUpDown, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-const productsData = [
-  {
-    id: 1,
-    name: 'Kingpark Cylinder',
-    price: 1800,
-    image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
-  },
-  {
-    id: 2,
-    name: 'Hi Power Cylinder',
-    price: 1000,
-    image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
-  },
-  {
-    id: 3,
-    name: 'For Park Cylinder',
-    price: 1000,
-    image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
-  },
-  {
-    id: 4,
-    name: 'IBM Cylinder',
-    price: 1000,
-    image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
-  },
-  {
-    id: 5,
-    name: 'Elmax Cylinder',
-    price: 1200,
-    image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
-  },
-];
 
 export default function Pos() {
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('');
 
   const addToCart = (product) => {
     const exist = cart.find((item) => item.id === product.id);
@@ -74,7 +51,20 @@ export default function Pos() {
   const removeFromCart = (id) => {
     setCart(cart.filter((item) => item.id !== id));
   };
-
+  const productsData = [
+    {
+      id: 1,
+      name: 'Kingpark Cylinder',
+      price: 1800,
+      image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
+    },
+    {
+      id: 2,
+      name: 'Hi Power Cylinder',
+      price: 1000,
+      image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
+    },
+  ];
   const filteredProducts = productsData.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -85,9 +75,30 @@ export default function Pos() {
     { lable: 'Total', score: '0' },
   ];
 
+  const frameworks = [
+    {
+      value: 'next.js',
+      label: 'Next.js',
+    },
+    {
+      value: 'sveltekit',
+      label: 'SvelteKit',
+    },
+    {
+      value: 'nuxt.js',
+      label: 'Nuxt.js',
+    },
+    {
+      value: 'remix',
+      label: 'Remix',
+    },
+    {
+      value: 'astro',
+      label: 'Astro',
+    },
+  ];
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      {/* ---------- LEFT: POS Cart Table ---------- */}
       <Card className="border shadow-md rounded-xl">
         <CardHeader className="border-b rounded-t-xl">
           <CardTitle className="text-lg font-medium">Point of Sale</CardTitle>
@@ -167,16 +178,57 @@ export default function Pos() {
           </div>
 
           <div className="mt-4 flex justify-end w-full">
-            <Select onValueChange={(value) => console.log('Selected:', value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Customer" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="applyDiscount">Apply Discount</SelectItem>
-                <SelectItem value="clearCart">Clear Cart</SelectItem>
-                <SelectItem value="checkout">Checkout</SelectItem>
-              </SelectContent>
-            </Select>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between"
+                >
+                  {value
+                    ? frameworks.find((framework) => framework.value === value)
+                        ?.label
+                    : 'Select framework...'}
+                  <ChevronsUpDown className="opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput
+                    placeholder="Search framework..."
+                    className="h-9"
+                  />
+                  <CommandList>
+                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandGroup>
+                      {frameworks.map((framework) => (
+                        <CommandItem
+                          key={framework.value}
+                          value={framework.value}
+                          onSelect={(currentValue) => {
+                            setValue(
+                              currentValue === value ? '' : currentValue
+                            );
+                            setOpen(false);
+                          }}
+                        >
+                          {framework.label}
+                          <Check
+                            className={cn(
+                              'ml-auto',
+                              value === framework.value
+                                ? 'opacity-100'
+                                : 'opacity-0'
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="grid grid-cols-2 gap-1 w-full mt-4">
@@ -190,7 +242,6 @@ export default function Pos() {
         </CardContent>
       </Card>
 
-      {/* ---------- RIGHT: Products Table ---------- */}
       <Card className="border shadow-md rounded-xl">
         <CardHeader className="border-b flex justify-between items-center">
           <CardTitle className="text-lg font-medium">Products List</CardTitle>

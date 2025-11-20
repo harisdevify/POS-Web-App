@@ -47,32 +47,10 @@ export default function Dashboard() {
       buyingPrice: 1100,
       sellingPrice: 1500,
       supplier: 'KeyPro',
-      status: 'Low Stock',
+      status: 'Out of Stock',
     },
     {
       id: 3,
-      image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
-      name: 'USB-C Hub',
-      category: 'Electronics',
-      stock: 0,
-      buyingPrice: 1400,
-      sellingPrice: 1800,
-      supplier: 'Kingpark',
-      status: 'Out of Stock',
-    },
-    {
-      id: 4,
-      image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
-      name: 'USB-C Hub',
-      category: 'Electronics',
-      stock: 0,
-      buyingPrice: 1400,
-      sellingPrice: 1800,
-      supplier: 'Kingpark',
-      status: 'Out of Stock',
-    },
-    {
-      id: 5,
       image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
       name: 'USB-C Hub',
       category: 'Electronics',
@@ -169,11 +147,7 @@ export default function Dashboard() {
                     <td>
                       <span
                         className={`px-2 py-1 rounded text-xs border ${
-                          p.status === 'In Stock'
-                            ? 'text-green-600 border-green-600'
-                            : p.status === 'Low Stock'
-                            ? 'text-yellow-600 border-yellow-600'
-                            : 'text-red-600 border-red-600'
+                          p.status === 'In Stock' ? 'active' : 'deactive'
                         }`}
                       >
                         {p.status}

@@ -4,199 +4,235 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import Image from 'next/image';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import Link from 'next/link';
 import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 
-export default function AddProduct() {
-  const [form, setForm] = useState({
-    photo: null,
-    preview: '',
-    name: '',
-    category: '',
-    supplier: '',
-    stock: '',
-    buyingDate: '',
-    buyingPrice: '',
-    sellingPrice: '',
-  });
+export default function AddCategory() {
+  const [file, setFile] = useState(null);
 
-  // 🖼 Handle File Upload & Preview
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'photo') {
-      const file = files[0];
-      setForm({
-        ...form,
-        photo: file,
-        preview: file ? URL.createObjectURL(file) : '',
-      });
-    } else {
-      setForm({ ...form, [name]: value });
-    }
-  };
+  // React Hook Form
+  const { register, handleSubmit, control } = useForm();
 
-  // 🧾 Handle Form Submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Product Added:', form);
-    alert('✅ Product added successfully (check console).');
-  };
-
-  const handleCancel = () => {
-    setForm({
-      photo: null,
-      preview: '',
-      name: '',
-      category: '',
-      supplier: '',
-      stock: '',
-      buyingDate: '',
-      buyingPrice: '',
-      sellingPrice: '',
-    });
+  const onSubmit = (data) => {
+    console.log('Form Data:', data);
+    console.log('Uploaded File:', file);
   };
 
   return (
     <div>
-      <Card className="shadow-md border rounded-xl mx-auto h-full">
-        <CardHeader className="border-b rounded-t-xl">
-          <CardTitle className="text-lg font-medium">Add Product</CardTitle>
+      <Card className="border shadow-sm rounded-lg">
+        <CardHeader className="border-b">
+          <CardTitle>Add Product</CardTitle>
         </CardHeader>
 
-        <CardContent className="p-6">
-          <form onSubmit={handleSubmit} className="grid gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="photo">Product Image</Label>
-              <Input
-                id="photo"
-                name="photo"
-                type="file"
-                accept="image/*"
-                onChange={handleChange}
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* File Upload */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="text-sm font-medium">Select Image</label>
+                <Input
+                  type="file"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Alt Content</label>
+                <Input
+                  placeholder="Enter Alt Content"
+                  {...register('alt_content', { required: true })}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col pt-2">
+              <label className="text-sm font-medium">Product Description</label>
+              <Textarea
+                placeholder="add Product Description..."
+                {...register('pro_desc')}
               />
-
-              {form.preview && (
-                <div className="mt-3">
-                  <Image
-                    src={form.preview}
-                    alt="Preview"
-                    width={120}
-                    height={120}
-                    className="rounded-md border object-cover"
-                  />
-                </div>
-              )}
             </div>
+            {/* Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="text-sm font-medium">Keywords</label>
+                <Input placeholder="Enter keywords" {...register('keywords')} />
+              </div>
 
-            {/* 🔹 2-Column Layout for Inputs */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Product Name */}
-              <div className="grid gap-2">
-                <Label htmlFor="name">Product Name *</Label>
+              <div>
+                <label className="text-sm font-medium">Meta Title</label>
                 <Input
-                  id="name"
-                  name="name"
-                  placeholder="Enter product name"
-                  required
-                  value={form.name}
-                  onChange={handleChange}
+                  placeholder="Enter meta title"
+                  {...register('metaTitle')}
                 />
               </div>
 
-              {/* Category */}
-              <div className="grid gap-2">
-                <Label htmlFor="category">Category *</Label>
+              <div>
+                <label className="text-sm font-medium">Meta Description</label>
                 <Input
-                  id="category"
+                  placeholder="Enter meta description"
+                  {...register('metaDescription')}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Product Title</label>
+                <Input
+                  placeholder="Enter Product Title"
+                  {...register('pro_title', { required: true })}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Select Category</Label>
+                <Controller
                   name="category"
-                  placeholder="Enter category"
-                  required
-                  value={form.category}
-                  onChange={handleChange}
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <Select
+                      className="w-full"
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      position="popper"
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent className="w-full">
+                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
               </div>
 
-              {/* Supplier */}
               <div className="grid gap-2">
-                <Label htmlFor="supplier">Supplier *</Label>
-                <Input
-                  id="supplier"
-                  name="supplier"
-                  placeholder="Enter supplier name"
-                  required
-                  value={form.supplier}
-                  onChange={handleChange}
+                <Label>Select Sub Category</Label>
+                <Controller
+                  name="subCategory"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <Select
+                      className="w-full"
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      position="popper"
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a sub category" />
+                      </SelectTrigger>
+                      <SelectContent className="w-full">
+                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
               </div>
 
-              {/* Product Stock */}
               <div className="grid gap-2">
-                <Label htmlFor="stock">Product Stock *</Label>
-                <Input
-                  id="stock"
-                  name="stock"
-                  type="number"
-                  placeholder="Enter stock quantity"
-                  required
-                  value={form.stock}
-                  onChange={handleChange}
+                <Label>Youtube Video</Label>
+                <Controller
+                  name="youtubeVideo"
+                  control={control}
+                  defaultValue="No"
+                  render={({ field }) => (
+                    <Select
+                      className="w-full"
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      position="popper"
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select option" />
+                      </SelectTrigger>
+                      <SelectContent className="w-full">
+                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
               </div>
-
-              {/* Buying Date */}
               <div className="grid gap-2">
-                <Label htmlFor="buyingDate">Buying Date</Label>
-                <Input
-                  id="buyingDate"
-                  name="buyingDate"
-                  type="date"
-                  value={form.buyingDate}
-                  onChange={handleChange}
-                />
+                <Label>Youtube Video URL</Label>
+                <Input placeholder="URL" {...register('youtubeUrl')} />
               </div>
 
-              {/* Buying Price */}
               <div className="grid gap-2">
-                <Label htmlFor="buyingPrice">Buying Price *</Label>
-                <Input
-                  id="buyingPrice"
-                  name="buyingPrice"
-                  type="number"
-                  placeholder="Enter buying price"
-                  required
-                  value={form.buyingPrice}
-                  onChange={handleChange}
+                <Label>Youtube Video ID</Label>
+                <Input placeholder="Video ID" {...register('youtubeVideoId')} />
+              </div>
+              <div className="grid gap-2">
+                <Label>In Stock</Label>
+                <Controller
+                  name="inStock"
+                  control={control}
+                  defaultValue="No"
+                  render={({ field }) => (
+                    <Select
+                      className="w-full"
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      position="popper"
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Stock?" />
+                      </SelectTrigger>
+                      <SelectContent className="w-full">
+                        <SelectItem value="Yes">Yes</SelectItem>
+                        <SelectItem value="No">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
               </div>
 
-              {/* Selling Price (full width if odd number of inputs) */}
-              <div className="grid gap-2 md:col-span-2">
-                <Label htmlFor="sellingPrice">Selling Price *</Label>
-                <Input
-                  id="sellingPrice"
-                  name="sellingPrice"
-                  type="number"
-                  placeholder="Enter selling price"
-                  required
-                  value={form.sellingPrice}
-                  onChange={handleChange}
+              {/* SHADCN SELECT - Featured */}
+              <div className="grid gap-2">
+                <Label>Featured</Label>
+                <Controller
+                  name="featured"
+                  control={control}
+                  defaultValue="No"
+                  render={({ field }) => (
+                    <Select
+                      className="w-full"
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      position="popper"
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Featured?" />
+                      </SelectTrigger>
+                      <SelectContent className="w-full">
+                        <SelectItem value="Yes">Yes</SelectItem>
+                        <SelectItem value="No">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
               </div>
             </div>
 
-            {/* 🧭 Buttons */}
-            <div className="flex justify-end gap-3 pt-6 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                className="px-6"
-              >
-                Cancel
+            {/* Buttons */}
+            <div className="flex justify-end gap-3 pt-4">
+              <Button asChild variant="outline">
+                <Link href="/products/categories">Cancel</Link>
               </Button>
-              <Button type="submit" className="px-6">
-                Add Product
-              </Button>
+              <Button type="submit">Submit</Button>
             </div>
           </form>
         </CardContent>

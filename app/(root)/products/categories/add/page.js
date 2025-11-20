@@ -14,7 +14,6 @@ export default function AddCategory() {
 
   // React Hook Form
   const { register, handleSubmit } = useForm();
-
   const onSubmit = (data) => {
     console.log('Form Data:', data);
     console.log('Uploaded File:', file);
