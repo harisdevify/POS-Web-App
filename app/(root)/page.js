@@ -1,5 +1,4 @@
-'use client';
-
+import { ProductTable } from '@/components/dashboard/ProductTable';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -8,25 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { DollarSign, ShoppingBag, User } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
 
-export default function Dashboard() {
-  const [open, setOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-
-  const products = [
+async function getProducts() {
+  return [
     {
       id: 1,
       image: 'https://pos.mianhardware.com/assets/images/product/default.webp',
@@ -61,16 +46,19 @@ export default function Dashboard() {
       status: 'Out of Stock',
     },
   ];
+}
 
-  const handleEdit = (product) => {
-    setSelectedProduct(product);
-    setOpen(true);
-  };
-  const stats = [
+async function getStats() {
+  return [
     { label: 'Total Users', value: '1,204', icon: <User size={22} /> },
     { label: 'Revenue', value: '$32,100', icon: <DollarSign size={22} /> },
     { label: 'Orders', value: '458', icon: <ShoppingBag size={22} /> },
   ];
+}
+
+export default async function Dashboard() {
+  const products = await getProducts();
+  const stats = await getStats();
 
   return (
     <div className="space-y-6">
@@ -91,14 +79,12 @@ export default function Dashboard() {
                 </CardTitle>
               </div>
 
-              {/* Optional icon */}
               {item.icon && <div className="p-3 rounded-lg">{item.icon}</div>}
             </CardHeader>
           </Card>
         ))}
       </div>
 
-      {/* ---------- Product Table ---------- */}
       <Card className="border rounded-lg shadow-sm">
         <CardHeader className="flex items-center justify-between border-b">
           <CardTitle className="text-base font-semibold">
@@ -112,132 +98,9 @@ export default function Dashboard() {
         </CardHeader>
 
         <CardContent>
-          <div className="overflow-x-auto table_scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>
-                    <p className="flex justify-center items-center">Image</p>
-                  </th>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Stock</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th>
-                    <p className="flex justify-center items-center">Action</p>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <Image
-                        src={p.image}
-                        alt={p.name}
-                        width={40}
-                        height={40}
-                      />
-                    </td>
-                    <td>{p.name}</td>
-                    <td>{p.category}</td>
-                    <td>{p.stock}</td>
-                    <td>Rs. {p.sellingPrice}</td>
-                    <td>
-                      <span
-                        className={`px-2 py-1 rounded text-xs border ${
-                          p.status === 'In Stock' ? 'active' : 'deactive'
-                        }`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(p)}
-                      >
-                        Edit
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ProductTable products={products} />
         </CardContent>
       </Card>
-
-      {/* ---------- Edit Product Dialog ---------- */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-          </DialogHeader>
-
-          {selectedProduct && (
-            <form className="space-y-4">
-              <div className="flex flex-col items-center">
-                <Image
-                  src={selectedProduct.image}
-                  alt={selectedProduct.name}
-                  width={100}
-                  height={100}
-                  className="rounded-md mb-2"
-                />
-                <Input type="file" accept="image/*" className="w-full" />
-              </div>
-
-              <div>
-                <Label className="mb-2">Product Name *</Label>
-                <Input defaultValue={selectedProduct.name} />
-              </div>
-
-              <div className="grid grid-cols-2">
-                <div>
-                  <Label className="mb-2">Category *</Label>
-                  <Input defaultValue={selectedProduct.category} />
-                </div>
-                <div>
-                  <Label className="mb-2">Supplier *</Label>
-                  <Input defaultValue={selectedProduct.supplier} />
-                </div>
-              </div>
-
-              <div>
-                <Label className="mb-2">Stock *</Label>
-                <Input type="number" defaultValue={selectedProduct.stock} />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="mb-2">Buying Price *</Label>
-                  <Input
-                    type="number"
-                    defaultValue={selectedProduct.buyingPrice}
-                  />
-                </div>
-                <div>
-                  <Label className="mb-2">Selling Price *</Label>
-                  <Input
-                    type="number"
-                    defaultValue={selectedProduct.sellingPrice}
-                  />
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Save</Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
