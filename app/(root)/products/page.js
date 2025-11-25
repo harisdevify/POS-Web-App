@@ -1,12 +1,15 @@
 import TableWrapper from '@/components/product/TableWrapper';
+import SearchBox from '@/components/SearchBox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { productAPI } from '@/services/productAPI';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 
-export default async function Products() {
-  const res = await productAPI({ page: 1 });
+export default async function Products({ searchParams }) {
+  const params = await searchParams;
+  const search = params?.search || '';
+
+  const res = await productAPI({ page: 1, search });
   const products = res?.data?.products ?? [];
   const pagination = res?.data?.meta ?? {};
 
@@ -18,7 +21,7 @@ export default async function Products() {
             All Products
           </CardTitle>
           <div className="flex justify-center items-center gap-2">
-            <Input placeholder="Search product..." className="h-8 w-48" />
+            <SearchBox initialValue={search} />
             <Link
               href={`/products/add-product`}
               className="button-relative group "

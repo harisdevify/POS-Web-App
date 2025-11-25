@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Button } from '../ui/button';
 import PasswordInput from './PasswordInput';
 
 const UpdatePassword = ({ onPasswordSubmit }) => {
@@ -68,12 +69,9 @@ const UpdatePassword = ({ onPasswordSubmit }) => {
 
           {/* Buttons */}
           <div className="flex justify-end w-full md:col-span-2">
-            <button
-              type="submit"
-              className="text-xs   px-3 py-1 rounded transition cursor-pointer"
-            >
+            <Button type="submit" className="cursor-pointer">
               Change Password
-            </button>
+            </Button>
           </div>
         </form>
       </div>

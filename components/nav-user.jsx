@@ -1,8 +1,5 @@
 'use client';
 
-import { ChevronsUpDown, LogOut } from 'lucide-react';
-import { useState } from 'react';
-
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,15 +24,17 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleLogout = () => {
-    // Add your logout logic here
-    console.log('User logged out');
+    signOut({ callbackUrl: '/login' });
     setIsDialogOpen(false);
   };
 
@@ -84,7 +83,11 @@ export function NavUser({ user }) {
             <DropdownMenuItem asChild>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <>
-                  <Button variant="ghost" onClick={() => setIsDialogOpen(true)}>
+                  <Button
+                    className="cursor-pointer w-full"
+                    variant="ghost"
+                    onClick={() => setIsDialogOpen(true)}
+                  >
                     <LogOut /> Log out
                   </Button>
                   <DialogContent className="sm:max-w-[400px]">

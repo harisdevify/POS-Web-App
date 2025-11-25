@@ -8,38 +8,13 @@ import defaultAvatar from '@/public/default-avatar.png';
 // import { updateProfile } from '@/services/profileAPI';
 import { Calendar, Edit, Mail, Phone, User2 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function AdminProfile() {
   const [isEditing, setIsEditing] = useState(false);
-  const [userId, setUserId] = useState(null);
   const [profileData, setProfileData] = useState([]);
   const [imgSrc, setImgSrc] = useState(defaultAvatar.src);
-
-  // 🔹 Load user ID from localStorage
-  // useEffect(() => {
-  //   const storedId = localStorage.getItem('userID');
-  //   if (storedId) setUserId(Number(storedId));
-  // }, []);
-
-  useEffect(() => {
-    // if (!userId) return;
-    // const loadData = async () => {
-    //   try {
-    //     const res = await profileAPI(userId);
-    //     if (res?.data) {
-    //       setProfileData(res.data);
-    //       if (res.data?.profile_pic) {
-    //         setImgSrc(`${IMAGE_BASE_URL}/${res.data.profile_pic}`);
-    //       }
-    //     }
-    //   } catch (error) {
-    //     toast.error('Failed to load profile data');
-    //   }
-    // };
-    // loadData();
-  }, [userId]);
 
   const onProfileSubmit = async (data) => {
     try {
@@ -110,12 +85,12 @@ export default function AdminProfile() {
         {/* Profile Overview Card */}
         <div className="lg:col-span-3 space-y-8">
           {/* Profile Card */}
-          <div className=" rounded-2xl shadow-sm border  overflow-hidden">
-            <div className="flex flex-col md:flex-row">
+          <div className=" rounded-2xl shadow-sm border overflow-hidden">
+            <div className="flex flex-col lg:flex-row">
               {/* Left Section - Avatar & Basic Info */}
-              <div className=" md:w-1/3 p-8 flex flex-col items-center justify-center text-center">
+              <div className=" lg:w-1/3 p-8 flex flex-col items-center justify-center text-center">
                 <div className="relative mb-6">
-                  <div className="relative w-32 h-32 rounded-full  p-1 shadow-lg">
+                  <div className="relative w-32 h-32 rounded-full p-1 shadow-lg">
                     <Image
                       src={imgSrc}
                       alt="Admin Avatar"
@@ -128,7 +103,7 @@ export default function AdminProfile() {
                   </div>
                 </div>
 
-                <h2 className="text-2xl font-bold  mb-2">
+                <h2 className="text-2xl font-bold mb-2">
                   {profileData?.full_name || 'Admin'}
                 </h2>
                 <p className=" text-sm mb-4">Administrator</p>

@@ -1,89 +1,72 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import Image from 'next/image';
-import { useState } from 'react';
-import EditProduct from './EditProduct';
+import { Edit } from 'lucide-react';
+import Link from 'next/link';
 
 export function ProductTable({ products }) {
-  const [open, setOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(products || null);
-
-  const handleEdit = (product) => {
-    setSelectedProduct(product);
-    setOpen(true);
-  };
-
   return (
     <>
       <div className="overflow-x-auto table_scroll">
         <table>
           <thead>
             <tr>
-              <th>
-                <p className="flex justify-center items-center">Image</p>
-              </th>
-              <th>Product</th>
+              <th>Title</th>
               <th>Category</th>
-              <th>Stock</th>
-              <th>Price</th>
+              <th>Sub Category</th>
+              <th>Availability</th>
               <th>Status</th>
               <th>
                 <p className="flex justify-center items-center">Action</p>
               </th>
             </tr>
           </thead>
+
           <tbody>
             {products.map((p) => (
-              <tr key={p.id}>
-                <td>
-                  <Image src={p.image} alt={p.name} width={40} height={40} />
-                </td>
-                <td>{p.name}</td>
-                <td>{p.category}</td>
-                <td>{p.stock}</td>
-                <td>Rs. {p.sellingPrice}</td>
+              <tr key={p.product_id}>
+                <td className="truncate max-w-[250px]">{p.product_name}</td>
+                <td>{p.bm_product_category?.p_category_name}</td>
+                <td>{p.bm_product_sub_category?.p_sub_category_name}</td>
                 <td>
                   <span
-                    className={` ${
-                      p.status === 'In Stock' ? 'active' : 'deactive'
+                    className={`px-2 py-1 rounded text-xs border ${
+                      p.in_stock === true ? 'active' : 'deactive'
                     }`}
                   >
-                    {p.status}
+                    {p.in_stock === true ? 'In Stock' : 'Out of Stock'}
                   </span>
                 </td>
                 <td>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(p)}
+                  <span
+                    className={`px-2 py-1 rounded text-xs border ${
+                      p.is_deleted == 0 ? 'active' : 'deactive'
+                    }`}
                   >
-                    Edit
-                  </Button>
+                    {p.is_deleted == 0 ? 'active' : 'deactive'}
+                  </span>
+                </td>
+
+                <td>
+                  <div className="flex justify-center items-center">
+                    <Link
+                      href={`/products/edit-product/${p.id}`}
+                      className="button-relative group"
+                    >
+                      <span className="button-absolute group-hover:opacity-0">
+                        Edit
+                      </span>
+                      <Edit
+                        size={18}
+                        className="btn-icon-absolute group-hover:opacity-100 group-hover:scale-110 group-hover:text-sky-500"
+                      />
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-          </DialogHeader>
-
-          {selectedProduct && (
-            <EditProduct selectedProduct={selectedProduct} setOpen={setOpen} />
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

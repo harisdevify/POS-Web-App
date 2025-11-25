@@ -4,19 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import logo from '@/public/logo.png';
 import { Command, Eye, EyeOff } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-
-export default function DemoLogin() {
+export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [wrongAnim, setWrongAnim] = useState(false);
-  const [wrongMsg, setWrongMsg] = useState('');
   const router = useRouter();
-  const animTimeoutRef = useRef(null);
-
   const {
     register,
     handleSubmit,
@@ -35,30 +31,23 @@ export default function DemoLogin() {
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      if (animTimeoutRef.current) clearTimeout(animTimeoutRef.current);
     };
   }, []);
 
-  const triggerWrongFeedback = (message) => {
-    setWrongMsg(message);
-    setWrongAnim(true);
+  const onSubmit = async ({ email, password }) => {
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    });
 
-    if (animTimeoutRef.current) clearTimeout(animTimeoutRef.current);
-    animTimeoutRef.current = setTimeout(() => setWrongAnim(false), 700);
-  };
-
-  // DEMO LOGIN ONLY
-  const onSubmit = ({ email, password }) => {
-    if (email === 'admin@demo.com' && password === '123456') {
-      localStorage.setItem('demo_user', 'Demo Admin');
-      toast.success('you have login.');
-      router.push('/');
+    if (result?.error) {
+      toast.error('Invalid email or password');
       return;
-    } else {
-      toast.error('email or password problem.');
     }
 
-    triggerWrongFeedback('Email or password is incorrect');
+    toast.success('Login successful');
+    router.push('/');
   };
 
   return (
@@ -94,12 +83,12 @@ export default function DemoLogin() {
           <div className="space-y-4 text-center">
             <h2 className="font-medium tracking-tight text-2xl">Bakumia POS</h2>
             <p className="text-muted-foreground mx-auto max-w-xl text-sm">
-              Use these demo login credentials
+              Use these login credentials for testing
             </p>
 
-            <p className="text-xs bg-gray-100 dark:bg-gray-100 rounded-md py-2 px-4 inline-block">
-              Email: <b>admin@demo.com</b> <br />
-              Password: <b>123456</b>
+            <p className="text-xs  rounded-md py-2 px-4 inline-block">
+              Email: <b>admin@bakumia-react.com</b> <br />
+              Password: <b>Bakumia22@@</b>
             </p>
           </div>
 
@@ -111,7 +100,6 @@ export default function DemoLogin() {
                 type="email"
                 placeholder="Email"
                 {...register('email', { required: 'Email is required' })}
-                className={wrongAnim ? 'shake-input' : ''}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">
@@ -122,16 +110,14 @@ export default function DemoLogin() {
 
             {/* Password */}
             <div>
-              <div className={`relative ${wrongAnim ? 'shake-wrapper' : ''}`}>
+              <div className={`relative`}>
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
                   {...register('password', {
                     required: 'Password is required',
                   })}
-                  className={`transition-all duration-150 ${
-                    wrongAnim ? 'shake glow' : ''
-                  }`}
+                  className={`transition-all duration-150 `}
                 />
                 <button
                   type="button"
@@ -142,21 +128,12 @@ export default function DemoLogin() {
                 </button>
               </div>
 
-              {wrongMsg && (
-                <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {wrongMsg}
-                </div>
-              )}
-
               <p className="text-xs text-muted-foreground mt-2 hidden md:flex items-center gap-1">
                 Press
-                <kbd className="px-1 py-0.5 bg-gray-100 dark:bg-gray-100 border rounded flex items-center gap-1">
+                <kbd className="px-1 py-0.5  border rounded flex items-center gap-1">
                   <Command className="w-3 h-3" />
                 </kbd>
-                +
-                <kbd className="px-1 py-0.5 bg-gray-100 dark:bg-gray-100 border rounded">
-                  S
-                </kbd>
+                +<kbd className="px-1 py-0.5  border rounded">S</kbd>
                 to show/hide password
               </p>
             </div>

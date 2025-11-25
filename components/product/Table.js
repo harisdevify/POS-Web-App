@@ -20,16 +20,16 @@ const Table = ({ products }) => {
       <tbody>
         {products.map((p) => (
           <tr key={p.product_id}>
-            <td>{p.product_name}</td>
+            <td className="truncate max-w-[250px]">{p.product_name}</td>
             <td>{p.bm_product_category?.p_category_name}</td>
             <td>{p.bm_product_sub_category?.p_sub_category_name}</td>
             <td>
               <span
                 className={`px-2 py-1 rounded text-xs border ${
-                  p.Availability === 'In Stock' ? 'active' : 'deactive'
+                  p.in_stock === true ? 'active' : 'deactive'
                 }`}
               >
-                {p.Availability}
+                {p.in_stock === true ? 'In Stock' : 'Out of Stock'}
               </span>
             </td>
             <td>

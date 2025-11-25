@@ -12,7 +12,7 @@ export default function PasswordInput({
 }) {
   return (
     <div className={`relative ${fullWidth ? 'md:col-span-2' : ''}`}>
-      <label className="block text-gray-600 mb-2 font-medium text-sm sm:text-base">
+      <label className="block  mb-2 font-medium text-sm sm:text-base">
         {label}
       </label>
       <Input
@@ -23,7 +23,7 @@ export default function PasswordInput({
       <button
         type="button"
         onClick={() => setShow(!show)}
-        className="absolute right-3 top-10 text-gray-500"
+        className="absolute right-3 top-10 "
       >
         {show ? <Eye size={18} /> : <EyeOff size={18} />}
       </button>

@@ -1,12 +1,16 @@
 import { apiFetch } from '@/lib/api';
 
-export function productAPI({ page = 1 }) {
+export const productAPI = async ({ page = 1, per_page = 10, search = '' }) => {
   return apiFetch('/get-all-product', {
-    cache: 'no-store',
     method: 'POST',
-    body: JSON.stringify({ page }),
+    cache: 'no-store',
+    body: JSON.stringify({
+      page,
+      per_page,
+      search,
+    }),
   });
-}
+};
 
 export function subCateAPI({ page = 1 }) {
   return apiFetch('/get-product-sub-cate', {

@@ -1,9 +1,13 @@
+import { auth } from '@/auth';
 import { AppSidebar } from '@/components/app-sidebar';
 import Header from '@/components/Header';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { redirect } from 'next/navigation';
+const Layout = async ({ children }) => {
+  const session = await auth();
+  if (!session) redirect('/login');
 
-const Layout = ({ children }) => {
   return (
     <>
       <ThemeProvider

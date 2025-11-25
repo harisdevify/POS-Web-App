@@ -7,24 +7,111 @@ import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { apiFetch } from '@/lib/api';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 export default function AddCategory() {
   const [file, setFile] = useState(null);
+  const [productCatTypes, setProductCatTypes] = useState([]);
+  const [productSubcategories, setProductSubcategories] = useState([]);
+  const { register, handleSubmit, control, watch } = useForm();
+  const router = useRouter();
+  const watchCategory = watch('category_id_fk');
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+  console.log(userId);
+  // Fetch Categories
+  useEffect(() => {
+    const fetchProductCat = async () => {
+      try {
+        const res = await apiFetch('/get-product-cate', {
+          cache: 'no-store',
+          method: 'POST',
+        });
+        if (res?.data) {
+          setProductCatTypes(res.data?.categories);
+        } else {
+          toast.error(res.message);
+        }
+      } catch {
+        toast.error('Failed to load product category.');
+      }
+    };
+    fetchProductCat();
+  }, []);
 
-  // React Hook Form
-  const { register, handleSubmit, control } = useForm();
+  // Fetch Subcategories
+  const fetchSubcategories = async (categoryId) => {
+    if (!categoryId) return;
+    try {
+      const res = await apiFetch('/subcategories-by-category', {
+        method: 'POST',
+        cache: 'no-store',
+        body: JSON.stringify({ category_id: Number(categoryId) }),
+      });
 
-  const onSubmit = (data) => {
-    console.log('Form Data:', data);
-    console.log('Uploaded File:', file);
+      if (res?.data?.data && Array.isArray(res.data.data)) {
+        setProductSubcategories(res.data.data);
+      } else {
+        setProductSubcategories([]);
+      }
+    } catch {
+      setProductSubcategories([]);
+    }
+  };
+
+  useEffect(() => {
+    if (watchCategory) fetchSubcategories(watchCategory);
+  }, [watchCategory]);
+
+  const onSubmit = async (data) => {
+    const formData = new FormData();
+
+    formData.append('keywords', data.keywords || '');
+    formData.append('meta_title', data.meta_title || '');
+    formData.append('meta_desc', data.meta_desc || '');
+    formData.append('product_name', data.product_name || '');
+    formData.append('alt_content', data.alt_content || '');
+    formData.append('product_details', data.product_details || '');
+    formData.append('category_id_fk', data.category_id_fk || '');
+    formData.append('subcat_id_fk', data.subcat_id_fk || '');
+    formData.append('is_youtube_video', data.is_youtube_video == 1 ? 1 : 0);
+    formData.append('youtube_video_url', data.youtube_video_url || '');
+    formData.append('youtube_video_id', data.youtube_video_id || '');
+    formData.append('in_stock', data.in_stock == 1 ? 1 : 0);
+    formData.append('is_featured', data.is_featured == 1 ? 1 : 0);
+    formData.append('user_id', userId || '');
+
+    if (file) {
+      formData.append('product_image', file);
+    }
+
+    try {
+      const res = await apiFetch('/add-products', {
+        method: 'POST',
+        cache: 'no-store',
+        body: formData,
+      });
+
+      if (res?.status === true) {
+        toast.success(res.message);
+        router.push(`/products`);
+      } else toast.error(res.message);
+    } catch (err) {
+      toast.error('Error while adding product.');
+    }
   };
 
   return (
@@ -58,7 +145,7 @@ export default function AddCategory() {
               <label className="text-sm font-medium">Product Description</label>
               <Textarea
                 placeholder="add Product Description..."
-                {...register('pro_desc')}
+                {...register('product_details')}
               />
             </div>
             {/* Fields */}
@@ -72,7 +159,7 @@ export default function AddCategory() {
                 <label className="text-sm font-medium">Meta Title</label>
                 <Input
                   placeholder="Enter meta title"
-                  {...register('metaTitle')}
+                  {...register('meta_title')}
                 />
               </div>
 
@@ -80,7 +167,7 @@ export default function AddCategory() {
                 <label className="text-sm font-medium">Meta Description</label>
                 <Input
                   placeholder="Enter meta description"
-                  {...register('metaDescription')}
+                  {...register('meta_desc')}
                 />
               </div>
 
@@ -88,29 +175,35 @@ export default function AddCategory() {
                 <label className="text-sm font-medium">Product Title</label>
                 <Input
                   placeholder="Enter Product Title"
-                  {...register('pro_title', { required: true })}
+                  {...register('product_name', { required: true })}
                 />
               </div>
 
               <div className="grid gap-2">
                 <Label>Select Category</Label>
                 <Controller
-                  name="category"
+                  name="category_id_fk"
                   control={control}
-                  defaultValue=""
                   render={({ field }) => (
                     <Select
-                      className="w-full"
-                      onValueChange={field.onChange}
                       value={field.value}
-                      position="popper"
+                      onValueChange={(val) => field.onChange(val)}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder="Select Category" />
                       </SelectTrigger>
-                      <SelectContent className="w-full">
-                        <SelectItem value="No">No</SelectItem>
-                        <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Select Category</SelectLabel>
+                          {productCatTypes?.map((pc_type) => (
+                            <SelectItem
+                              key={pc_type.p_category_id}
+                              value={String(pc_type.p_category_id)}
+                            >
+                              {pc_type.p_category_name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   )}
@@ -120,22 +213,30 @@ export default function AddCategory() {
               <div className="grid gap-2">
                 <Label>Select Sub Category</Label>
                 <Controller
-                  name="subCategory"
+                  name="subcat_id_fk"
                   control={control}
-                  defaultValue=""
                   render={({ field }) => (
                     <Select
-                      className="w-full"
-                      onValueChange={field.onChange}
                       value={field.value}
-                      position="popper"
+                      onValueChange={(val) => field.onChange(val)}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a sub category" />
+                        <SelectValue placeholder="Select Sub Category" />
                       </SelectTrigger>
-                      <SelectContent className="w-full">
-                        <SelectItem value="No">No</SelectItem>
-                        <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Select Sub Category</SelectLabel>
+                          {productSubcategories?.length > 0
+                            ? productSubcategories.map((subcat) => (
+                                <SelectItem
+                                  key={subcat.s_cat_id}
+                                  value={String(subcat.s_cat_id)}
+                                >
+                                  {subcat.p_sub_category_name}
+                                </SelectItem>
+                              ))
+                            : null}
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   )}
@@ -145,22 +246,23 @@ export default function AddCategory() {
               <div className="grid gap-2">
                 <Label>Youtube Video</Label>
                 <Controller
-                  name="youtubeVideo"
+                  name="is_youtube_video"
                   control={control}
-                  defaultValue="No"
+                  defaultValue={0}
                   render={({ field }) => (
                     <Select
-                      className="w-full"
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      position="popper"
+                      value={String(field.value)}
+                      onValueChange={(val) => field.onChange(Number(val))}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select option" />
+                        <SelectValue placeholder="Youtube Video" />
                       </SelectTrigger>
-                      <SelectContent className="w-full">
-                        <SelectItem value="No">No</SelectItem>
-                        <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Youtube Video</SelectLabel>
+                          <SelectItem value="1">Yes</SelectItem>
+                          <SelectItem value="0">No</SelectItem>
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   )}
@@ -168,58 +270,62 @@ export default function AddCategory() {
               </div>
               <div className="grid gap-2">
                 <Label>Youtube Video URL</Label>
-                <Input placeholder="URL" {...register('youtubeUrl')} />
+                <Input placeholder="URL" {...register('youtube_video_url')} />
               </div>
 
               <div className="grid gap-2">
                 <Label>Youtube Video ID</Label>
-                <Input placeholder="Video ID" {...register('youtubeVideoId')} />
+                <Input
+                  placeholder="Video ID"
+                  {...register('youtube_video_id')}
+                />
               </div>
               <div className="grid gap-2">
                 <Label>In Stock</Label>
                 <Controller
-                  name="inStock"
+                  name="in_stock"
                   control={control}
-                  defaultValue="No"
+                  defaultValue={0}
                   render={({ field }) => (
                     <Select
-                      className="w-full"
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      position="popper"
+                      value={String(field.value)}
+                      onValueChange={(val) => field.onChange(Number(val))}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Stock?" />
+                        <SelectValue placeholder="In Stock" />
                       </SelectTrigger>
-                      <SelectContent className="w-full">
-                        <SelectItem value="Yes">Yes</SelectItem>
-                        <SelectItem value="No">No</SelectItem>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>In Stock</SelectLabel>
+                          <SelectItem value="1">Yes</SelectItem>
+                          <SelectItem value="0">No</SelectItem>
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   )}
                 />
               </div>
 
-              {/* SHADCN SELECT - Featured */}
               <div className="grid gap-2">
                 <Label>Featured</Label>
                 <Controller
-                  name="featured"
+                  name="is_featured"
                   control={control}
-                  defaultValue="No"
+                  defaultValue={0}
                   render={({ field }) => (
                     <Select
-                      className="w-full"
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      position="popper"
+                      value={String(field.value)}
+                      onValueChange={(val) => field.onChange(Number(val))}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Featured?" />
+                        <SelectValue placeholder="Featured" />
                       </SelectTrigger>
-                      <SelectContent className="w-full">
-                        <SelectItem value="Yes">Yes</SelectItem>
-                        <SelectItem value="No">No</SelectItem>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Featured</SelectLabel>
+                          <SelectItem value="1">Yes</SelectItem>
+                          <SelectItem value="0">No</SelectItem>
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   )}
@@ -230,7 +336,7 @@ export default function AddCategory() {
             {/* Buttons */}
             <div className="flex justify-end gap-3 pt-4">
               <Button asChild variant="outline">
-                <Link href="/products/categories">Cancel</Link>
+                <Link href="/products">Cancel</Link>
               </Button>
               <Button type="submit">Submit</Button>
             </div>
