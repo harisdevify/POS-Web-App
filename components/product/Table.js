@@ -45,7 +45,7 @@ const Table = ({ products }) => {
             <td>
               <div className="flex justify-center items-center">
                 <Link
-                  href={`/products/edit-product/${p.id}`}
+                  href={`/products/edit-product/${p.product_id}`}
                   className="button-relative group"
                 >
                   <span className="button-absolute group-hover:opacity-0">

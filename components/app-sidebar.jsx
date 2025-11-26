@@ -1,5 +1,7 @@
 'use client';
 
+import { NavUser } from '@/components/nav-user';
+import { TeamSwitcher } from '@/components/team-switcher';
 import {
   BookOpenText,
   ChevronDown,
@@ -11,9 +13,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
-
-import { NavUser } from '@/components/nav-user';
-import { TeamSwitcher } from '@/components/team-switcher';
 
 import {
   Sidebar,
@@ -28,7 +27,7 @@ const data = {
   user: {
     name: 'Tayyab',
     email: 'tayyabdevify@gmail.com',
-    avatar: '/table.jpg',
+    avatar: '/default-avatar.png',
   },
 
   teams: [{ name: 'POS', logo: GalleryVerticalEnd, plan: 'Web App' }],

@@ -31,8 +31,7 @@ export default function AddCategory() {
   const watchCategory = watch('category_id_fk');
   const { data: session } = useSession();
   const userId = session?.user?.id;
-  console.log(userId);
-  // Fetch Categories
+
   useEffect(() => {
     const fetchProductCat = async () => {
       try {
@@ -104,7 +103,7 @@ export default function AddCategory() {
         cache: 'no-store',
         body: formData,
       });
-
+      console.log(res);
       if (res?.status === true) {
         toast.success(res.message);
         router.push(`/products`);
@@ -131,6 +130,7 @@ export default function AddCategory() {
                   type="file"
                   onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                   className="w-full"
+                  required
                 />
               </div>
               <div>
@@ -141,6 +141,7 @@ export default function AddCategory() {
                 />
               </div>
             </div>
+
             <div className="flex flex-col pt-2">
               <label className="text-sm font-medium">Product Description</label>
               <Textarea

@@ -1,11 +1,19 @@
 'use client';
+
 import { Input } from '@/components/ui/input';
 import { IMAGE_BASE_URL } from '@/lib/api';
 import defaultAvatar from '@/public/default-avatar.png';
-import { X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '../ui/button';
 
 export default function EditProModal({
   setIsEditing,
@@ -22,7 +30,6 @@ export default function EditProModal({
     reset,
   } = useForm();
 
-  // default data
   useEffect(() => {
     if (profileData) {
       reset({
@@ -34,7 +41,7 @@ export default function EditProModal({
       if (profileData.profile_pic) {
         setImgSrc(`${IMAGE_BASE_URL}/${profileData.profile_pic}`);
       } else {
-        setImgSrc(defaultAvatar.src); // fallback if API missing image
+        setImgSrc(defaultAvatar.src);
       }
     }
   }, [profileData, reset]);
@@ -47,60 +54,51 @@ export default function EditProModal({
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container">
-        <div className="modal-header">
-          <button
-            onClick={() => setIsEditing(false)}
-            className="absolute right-3  "
-          >
-            <X size={20} />
-          </button>
+    <Dialog open={true} onOpenChange={setIsEditing}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Update Profile</DialogTitle>
+        </DialogHeader>
 
-          <h2 className="text-xl font-semibold ">Update Profile</h2>
-        </div>
-
-        <form
-          onSubmit={handleSubmit(onProfileSubmit)}
-          className="space-y-4 modal-body"
-        >
+        <form onSubmit={handleSubmit(onProfileSubmit)} className="space-y-4">
           <div>
-            <label className="block  mb-1 text-sm sm:text-base">Name</label>
+            <label className="block mb-1 text-sm">Name</label>
             <Input type="text" {...register('name', { required: true })} />
             {profileErrors.name && (
               <p className="text-red-500 text-sm">Name is required</p>
             )}
           </div>
+
           <div>
-            <label className="block  mb-1 text-sm sm:text-base">Email</label>
+            <label className="block mb-1 text-sm">Email</label>
             <Input type="email" {...register('email', { required: true })} />
             {profileErrors.email && (
               <p className="text-red-500 text-sm">Email is required</p>
             )}
           </div>
+
           <div>
-            <label className="block  mb-1 text-sm sm:text-base">Phone</label>
+            <label className="block mb-1 text-sm">Phone</label>
             <Input type="text" {...register('phone', { required: true })} />
             {profileErrors.phone && (
               <p className="text-red-500 text-sm">Phone is required</p>
             )}
           </div>
+
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <label className="block mb-1 text-sm sm:text-base">
-                Profile Image
-              </label>
-              <input
-                className="file-control form-control p-1 w-full border  rounded-md focus:outline-none focus:ring-2  transition"
+              <label className="block mb-1 text-sm">Profile Image</label>
+              <Input
                 type="file"
                 {...register('pro_img')}
                 onChange={handleFileChange}
+                className="file-control p-1 w-full border rounded-md"
               />
             </div>
 
-            {(preview || profileData?.profile_pic) && (
+            {preview && (
               <div className="flex flex-col items-center">
-                <div className="w-[50px] h-[50px] rounded-full overflow-hidden border  shadow-sm">
+                <div className="w-[50px] h-[50px] rounded-full overflow-hidden border shadow-sm">
                   <Image
                     src={preview || imgSrc}
                     alt="Preview"
@@ -110,22 +108,16 @@ export default function EditProModal({
                     onError={() => setImgSrc(defaultAvatar.src)}
                   />
                 </div>
-
                 <p className="text-xs mt-1">Preview</p>
               </div>
             )}
           </div>
 
           <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              className=" text-sm px-3 py-1 rounded transition"
-            >
-              Save Changes
-            </button>
+            <Button type="submit">Save Changes</Button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

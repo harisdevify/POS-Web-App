@@ -1,20 +1,47 @@
 'use client';
 
+import { dateFormat } from '@/components/DateFormat';
 import EditProModal from '@/components/profile/EditProModal';
 import InfoCard from '@/components/profile/InfoCard';
 import UpdatePassword from '@/components/profile/UpdatePassword';
 import { apiFetch, IMAGE_BASE_URL } from '@/lib/api';
 import defaultAvatar from '@/public/default-avatar.png';
-// import { updateProfile } from '@/services/profileAPI';
 import { Calendar, Edit, Mail, Phone, User2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function AdminProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState([]);
   const [imgSrc, setImgSrc] = useState(defaultAvatar.src);
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const loadData = async () => {
+      try {
+        const res = await apiFetch(`/profile/${userId}`, {
+          method: 'POST',
+          cache: 'no-store',
+        });
+        console.log(res);
+        if (res?.data) {
+          setProfileData(res.data);
+          if (res.data?.profile_pic) {
+            setImgSrc(`${IMAGE_BASE_URL}/${res.data.profile_pic}`);
+          }
+        }
+      } catch (error) {
+        toast.error('Failed to load profile data');
+      }
+    };
+
+    loadData();
+  }, [userId]);
 
   const onProfileSubmit = async (data) => {
     try {
@@ -23,19 +50,29 @@ export default function AdminProfile() {
       formData.append('full_name', data.name);
       formData.append('email', data.email);
       formData.append('phone', data.phone);
+      formData.append('Address', data.Address);
 
       if (data.pro_img && data.pro_img[0]) {
         formData.append('profile_pic', data.pro_img[0]);
       }
 
-      const res = await updateProfile(formData);
-
+      const res = await apiFetch('/update-profile', {
+        method: 'POST',
+        cache: 'no-store',
+        body: formData,
+      });
+      console.log(res);
       if (res.status === true) {
         toast.success(res.message);
         setIsEditing(false);
 
         // Refresh profile data
-        // const updated = await profileAPI(userId);
+        const updated = await apiFetch(`/profile/${userId}`, {
+          method: 'POST',
+          cache: 'no-store',
+          body: JSON.stringify({ user_id: userId }),
+        });
+
         if (updated?.data) {
           setProfileData(updated.data);
           if (updated.data.profile_pic) {
@@ -57,15 +94,21 @@ export default function AdminProfile() {
     }
 
     try {
-      const res = await apiFetch('/profile/:user_id', {
+      const res = await apiFetch('/change-password', {
         method: 'POST',
         cache: 'no-store',
+        body: JSON.stringify({
+          user_id: userId,
+          old_password: data.currentPassword,
+          password: data.newPassword,
+          confirm_password: data.confirmPassword,
+        }),
       });
       if (res.status === true) {
-        toast.success('Password changed successfully!');
+        toast.success(res.message);
         return true;
       } else {
-        toast.error(res.message || 'Something went wrong!');
+        toast.error(res.message);
       }
     } catch (error) {
       console.error(error);
@@ -149,7 +192,7 @@ export default function AdminProfile() {
                     label="Member Since"
                     value={
                       profileData?.reg_date
-                        ? profileData.reg_date
+                        ? dateFormat(profileData.reg_date)
                         : '1 Jun 2000'
                     }
                   />

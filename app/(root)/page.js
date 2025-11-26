@@ -17,7 +17,6 @@ export default async function Dashboard() {
     cache: 'no-store',
   });
   const product = res.data;
-  console.log(product);
 
   return (
     <div className="space-y-6">

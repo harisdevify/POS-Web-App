@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'pos.mianhardware.com',
+        hostname: 'api.bakumia.com',
         port: '',
         pathname: '/**',
       },

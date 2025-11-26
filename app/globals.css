@@ -154,6 +154,9 @@
   .deactive {
     @apply px-2 py-1 text-xs font-medium rounded-full border text-red-600 border-red-600;
   }
+  .form-control {
+    @apply w-full border rounded-lg p-2 text-sm focus:outline-none;
+  }
 }
 
 /* Table global CSS */
