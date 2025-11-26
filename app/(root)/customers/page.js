@@ -1,9 +1,9 @@
-'use client';
+
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Edit, Plus } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import defaultAvatar from '@/public/default-avatar.png';
 
 import {
   DropdownMenu,
@@ -15,40 +15,16 @@ import {
 import { Button } from '@/components/ui/button'; // for trigger button
 import { Landmark, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { apiFetch, IMAGE_BASE_URL } from '@/lib/api';
 
-const initialCustomers = [
-  {
-    id: 1,
-    photo: '/table.jpg',
-    name: 'Ali Khan',
-    email: 'ali@example.com',
-    phone: '0301-1234567',
-    shopname: 'Ali Traders',
-    remainingBalance: 1500,
-  },
-  {
-    id: 2,
-    photo: '/table.jpg',
-    name: 'Ahmad Raza',
-    email: 'ahmad@example.com',
-    phone: '0302-9876543',
-    shopname: 'Raza Mart',
-    remainingBalance: 800,
-  },
-  {
-    id: 3,
-    photo: '/table.jpg',
-    name: 'Sara Ahmed',
-    email: 'sara@example.com',
-    phone: '0303-1122334',
-    shopname: 'Sara Store',
-    remainingBalance: 0,
-  },
-];
 
-export default function Customers() {
-  const [customers, setCustomers] = useState(initialCustomers);
-
+export default async function Customers() {
+const res = await apiFetch('/customers', {
+    method: 'POST',
+    cache: 'no-store',
+  });
+    const customers = res?.data?.users ?? [];
+  const pagination = res?.data?.meta ?? {};
   return (
     <div>
       <Card className="border shadow-sm rounded-lg">
@@ -75,7 +51,7 @@ export default function Customers() {
                   <th>Email</th>
                   <th>Phone</th>
                   <th>Shop Name</th>
-                  <th>Remaining Balance</th>
+                 
                   <th>Action</th>
                 </tr>
               </thead>
@@ -86,7 +62,7 @@ export default function Customers() {
                     <tr key={c.id}>
                       <td>
                         <Image
-                          src={c.photo}
+                          src={`${IMAGE_BASE_URL}/${c.photo}`}
                           alt={c.name}
                           width={40}
                           height={40}
@@ -98,7 +74,7 @@ export default function Customers() {
                       <td>{c.email}</td>
                       <td>{c.phone}</td>
                       <td>{c.shopname}</td>
-                      <td>Rs. {c.remainingBalance}</td>
+                      
 
                       <td className="text-center border">
                         <DropdownMenu>

@@ -1,10 +1,6 @@
 'use client';
 
-import { Trash2 } from 'lucide-react';
-import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-
-// SHADCN UI
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -15,57 +11,170 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { apiFetch, IMAGE_BASE_URL } from '@/lib/api';
+import { Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { toast } from 'sonner';
 
-export default function ProductVariant() {
-  const [variantColors] = useState([
-    { color_id: 1, color_name: 'Red' },
-    { color_id: 2, color_name: 'Blue' },
-    { color_id: 3, color_name: 'Black' },
-  ]);
-
-  const [variantImages, setVariantImages] = useState([
-    {
-      p_img_id: 101,
-      image_path: '/table.jpg',
-      rimg_alt_content: 'Demo Image 1',
-    },
-    {
-      p_img_id: 102,
-      image_path: '/table.jpg',
-      rimg_alt_content: 'Demo Image 2',
-    },
-    {
-      p_img_id: 103,
-      image_path: '/table.jpg',
-      rimg_alt_content: 'Demo Image 3',
-    },
-  ]);
-
-  const { register, handleSubmit, control, watch } = useForm({
+export default function ProductVariant({ params }) {
+  const { pv_id } = use(params);
+  const [variantColors, setVariantColors] = useState([]);
+  const [variantImages, setVariantImages] = useState([]);
+  const router = useRouter();
+  const { register, reset, handleSubmit, control } = useForm({
     defaultValues: {
-      product_id_fk: '1',
-      p_v_id: '101',
-      p_v_name: 'Premium Variant',
-      product_weight: '250',
-      purchase_price: '1200',
-      sale_price: '1800',
-      discount_percent: 10,
-      total_quantity: 50,
-      available_quantity: 30,
-      variant_color: 1,
-      in_stock: 1,
+      product_id_fk: '',
+      pv_id: '',
+      p_v_name: '',
+      product_weight: '',
+      purchase_price: '',
+      sale_price: '',
+      discount_percent: 0,
+      total_quantity: 0,
+      available_quantity: 0,
+      variant_color: '',
+      in_stock: 0,
       is_deleted: 0,
     },
   });
 
-  const watchFiles = watch('image_path');
+  const watchFiles = useWatch({ control, name: 'image_path' });
 
-  const handleDeleteImage = (id) => {
-    setVariantImages((prev) => prev.filter((img) => img.p_img_id !== id));
+  // Fetch variant details
+  const loadVariant = async () => {
+    try {
+      const res = await apiFetch('/product-variant-by-id', {
+        method: 'POST',
+        cache: 'no-store',
+        body: JSON.stringify({ p_v_id: pv_id }),
+      });
+      if (res?.data) {
+        const d = res.data;
+        reset({
+          product_id_fk: d.product_id_fk || '',
+          p_v_id: d.p_v_id || '',
+          p_v_name: d.p_v_name || '',
+          product_weight: d.product_weight || '',
+          purchase_price: d.product_original_price || '',
+          sale_price: d.product_price || '',
+          discount_percent: d.discount_percent || 0,
+          total_quantity: d.total_quantity || 0,
+          available_quantity: d.available_quantity || 0,
+          variant_color: d.color_id_fk || '',
+          in_stock: Number(d.in_stock),
+          is_deleted: Number(d.is_deleted),
+        });
+
+        setVariantImages(d.bm_product_images || []);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to load variant data');
+    }
   };
 
-  const onSubmit = (data) => {
-    console.log('SUBMIT DATA:', data);
+  useEffect(() => {
+    loadVariant();
+  }, [pv_id, reset]);
+
+  // Fetch colors
+  useEffect(() => {
+    const loadColors = async () => {
+      try {
+        const res = await apiFetch('/get-all-colors', {
+          method: 'POST',
+          cache: 'no-store',
+        });
+        if (res?.status) {
+          setVariantColors(res?.data?.colors || []);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to load colors');
+      }
+    };
+    loadColors();
+  }, []);
+
+  const onSubmit = async (data) => {
+    console.log('data:', data);
+    const body = new FormData();
+
+    body.append('product_id_fk', data.product_id_fk);
+    body.append('p_v_id', data.p_v_id);
+    body.append('p_v_name', data.p_v_name);
+    body.append('product_weight', data.product_weight);
+    body.append('product_price', data.sale_price);
+    body.append('product_original_price', data.purchase_price);
+    body.append('discount_percent', data.discount_percent);
+    body.append('total_quantity', data.total_quantity);
+    body.append('available_quantity', data.available_quantity);
+    body.append('color_id_fk', data.variant_color);
+    body.append('in_stock', Number(data.in_stock));
+    body.append('is_deleted', Number(data.is_deleted));
+
+    if (variantImages.length > 0 && data.rimg_alt_content) {
+      Object.entries(data.rimg_alt_content).forEach(([index, alt]) => {
+        const img = variantImages[index];
+        if (img?.p_img_id) {
+          body.append('p_img_id[]', img.p_img_id);
+          body.append('rimg_alt_content[]', alt || '');
+        }
+      });
+    }
+
+    // New uploaded files + their alt
+    if (data.image_path && data.image_path.length > 0) {
+      const newAltArray =
+        data.new_alt_content && typeof data.new_alt_content === 'object'
+          ? Object.values(data.new_alt_content)
+          : [];
+
+      for (let i = 0; i < data.image_path.length; i++) {
+        body.append('image_path', data.image_path[i]);
+        body.append('new_alt_content[]', newAltArray[i] || '');
+      }
+    }
+
+    try {
+      const res = await apiFetch('/update-varient', {
+        method: 'POST',
+        cache: 'no-store',
+        body,
+      });
+      if (res?.status === true) {
+        toast.success(res.message);
+        await loadVariant();
+        router.push(`/products/edit-product/${data.product_id_fk}`);
+      } else {
+        toast.error(res?.message);
+      }
+    } catch (error) {
+      toast.error('Something went wrong');
+    }
+  };
+
+  const handleDeleteImage = async (p_img_id) => {
+    try {
+      const res = await apiFetch(`/delete-varient-images`, {
+        method: 'POST',
+        cache: 'no-store',
+        body: JSON.stringify({ p_img_id }),
+      });
+      if (res?.message) {
+        toast.success(res.message);
+        setVariantImages((prev) =>
+          prev.filter((img) => img.p_img_id !== p_img_id)
+        );
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      toast.error('Error deleting variant image');
+    }
   };
 
   return (
@@ -85,6 +194,13 @@ export default function ProductVariant() {
                   className="group relative rounded-lg border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
                 >
                   <div className="relative w-full h-40 ">
+                    <Image
+                      src={`${IMAGE_BASE_URL}/${variantImag.image_path}`}
+                      alt={variantImag.rimg_alt_content}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover"
+                    />
                     <button
                       type="button"
                       onClick={() => handleDeleteImage(variantImag.p_img_id)}
@@ -256,9 +372,7 @@ export default function ProductVariant() {
                 )}
               />
 
-              <button type="submit" className="add-btn px-4 py-2 text-xs">
-                Update Variant
-              </button>
+              <Button type="submit">Update Variant</Button>
             </div>
           </CardContent>
         </Card>

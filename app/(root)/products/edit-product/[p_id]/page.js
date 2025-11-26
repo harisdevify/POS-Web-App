@@ -11,22 +11,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { apiFetch, IMAGE_BASE_URL } from '@/lib/api';
 import { Edit, Plus } from 'lucide-react';
@@ -43,8 +33,16 @@ export default function EditProduct() {
   const [productSubcategories, setProductSubcategories] = useState([]);
   const [file, setFile] = useState(null);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [variantColors, setVariantColors] = useState([]);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
 
-  const { register, handleSubmit, watch, reset, control } = useForm({
+    control,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       product_id: '',
       keywords: '',
@@ -65,6 +63,7 @@ export default function EditProduct() {
   });
 
   const watchCategory = watch('category_id_fk');
+  const watchSubCategory = watch('subcat_id_fk');
 
   // Fetch product data
   useEffect(() => {
@@ -75,7 +74,6 @@ export default function EditProduct() {
           method: 'POST',
           body: JSON.stringify({ product_id: p_id }),
         });
-        console.log('get-product', res);
         if (res?.data) {
           reset(res.data);
           if (res?.data?.category_id_fk) {
@@ -98,6 +96,7 @@ export default function EditProduct() {
           cache: 'no-store',
           method: 'POST',
         });
+
         if (res?.data) setProductCatTypes(res.data.categories || []);
       } catch (error) {
         console.log(error);
@@ -120,6 +119,7 @@ export default function EditProduct() {
         cache: 'no-store',
         body: JSON.stringify({ category_id: Number(categoryId) }),
       });
+
       if (res?.data?.data && Array.isArray(res.data.data)) {
         setProductSubcategories(res.data.data);
       } else {
@@ -129,6 +129,46 @@ export default function EditProduct() {
       setProductSubcategories([]);
     }
   };
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const res = await apiFetch('/get-all-colors', {
+          method: 'POST',
+          cache: 'no-store',
+        });
+
+        if (res?.status) {
+          setVariantColors(res?.data?.colors || []);
+        } else {
+          toast.error(res?.message);
+        }
+      } catch (error) {
+        toast.error(error?.message);
+      }
+    };
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const res = await apiFetch('/product-variant', {
+          method: 'POST',
+          cache: 'no-store',
+          body: JSON.stringify({ product_id: p_id }),
+        });
+        if (res) {
+          setProducts(res?.data || []);
+        } else {
+          toast.error(res.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+    loadData();
+  }, [p_id]);
 
   const onSubmit = async (data) => {
     try {
@@ -162,7 +202,7 @@ export default function EditProduct() {
         cache: 'no-store',
         body: formData,
       });
-
+      console.log(res);
       if (res?.status === true) {
         toast.success(res.message);
         router.push('/products');
@@ -174,11 +214,50 @@ export default function EditProduct() {
     }
   };
 
+  // add variant submit
+  const onAdd = async (data) => {
+    const body = new FormData();
+    body.append('product_id_fk', p_id);
+    body.append('p_v_name', data.variant_name);
+    body.append('product_weight', data.variant_weight);
+    body.append('product_original_price', data.original_price);
+    body.append('product_price', data.price);
+    body.append('discount_percent', data.discount);
+    body.append('total_quantity', data.total_qty);
+    body.append('available_quantity', data.available_qty);
+    body.append('color_id_fk', data.variant_color);
+    body.append('rimg_alt_content', data.rimg_alt_content);
+
+    // Files
+    if (data.image_path && data.image_path.length > 0) {
+      for (const file of data.image_path) {
+        body.append('image_path', file);
+      }
+    }
+
+    try {
+      const res = await apiFetch('/store-product-variant', {
+        method: 'POST',
+        cache: 'no-store',
+        body,
+      });
+      console.log(res);
+      if (res?.status === true) {
+        toast.success(res.message);
+        router.refresh();
+      } else {
+        toast.error(res?.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div>
       <Card className="border shadow-sm rounded-lg">
         <CardHeader className="border-b">
-          <CardTitle>Edit Product {p_id}</CardTitle>
+          <CardTitle>Edit Product</CardTitle>
         </CardHeader>
 
         <CardContent>
@@ -256,66 +335,51 @@ export default function EditProduct() {
 
               <div className="grid gap-2">
                 <Label>Select Category</Label>
-                <Controller
-                  name="category_id_fk"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      value={field.value}
-                      onValueChange={(val) => field.onChange(val)}
+                <select
+                  {...register('category_id_fk')}
+                  className="form-control w-full"
+                  onChange={async (e) => {
+                    const selectedCat = e.target.value;
+                    setValue('category_id_fk', selectedCat);
+                    setValue('subcat_id_fk', '');
+                    await fetchSubcategories(selectedCat);
+                  }}
+                  value={watchCategory || ''}
+                >
+                  <option value="Select Category">Select Category</option>
+                  {productCatTypes?.map((pc_type) => (
+                    <option
+                      key={pc_type.p_category_id}
+                      value={pc_type.p_category_id}
                     >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Select Category</SelectLabel>
-                          {productCatTypes?.map((pc_type) => (
-                            <SelectItem
-                              key={pc_type.p_category_id}
-                              value={String(pc_type.p_category_id)}
-                            >
-                              {pc_type.p_category_name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+                      {pc_type.p_category_name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid gap-2">
                 <Label>Select Sub Category</Label>
-                <Controller
-                  name="subcat_id_fk"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      value={field.value}
-                      onValueChange={(val) => field.onChange(val)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Sub Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Select Sub Category</SelectLabel>
-                          {productSubcategories?.length > 0
-                            ? productSubcategories.map((subcat) => (
-                                <SelectItem
-                                  key={subcat.s_cat_id}
-                                  value={String(subcat.s_cat_id)}
-                                >
-                                  {subcat.p_sub_category_name}
-                                </SelectItem>
-                              ))
-                            : null}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                <select
+                  {...register('subcat_id_fk')}
+                  className="form-control w-full"
+                  onChange={(e) => {
+                    const selectedSub = e.target.value;
+                    setValue('subcat_id_fk', selectedSub);
+                  }}
+                  value={watchSubCategory || ''}
+                >
+                  <option value="">Select Subcategory</option>
+                  {productSubcategories?.length > 0 ? (
+                    productSubcategories.map((subcat) => (
+                      <option key={subcat.s_cat_id} value={subcat.s_cat_id}>
+                        {subcat.p_sub_category_name}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>No Subcategories</option>
                   )}
-                />
+                </select>
               </div>
 
               <div className="grid gap-2">
@@ -434,29 +498,165 @@ export default function EditProduct() {
                 <DialogTitle>Add Variant</DialogTitle>
               </DialogHeader>
 
-              <form className="grid grid-cols-2 gap-4 mt-4">
-                <Input type="file" />
-                <Input type="text" placeholder="Enter Alt Content" />
-                <Select className="w-full">
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Color" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    <SelectItem value="Red">Red</SelectItem>
-                    <SelectItem value="Blue">Blue</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input type="text" placeholder="Enter Variant Name" />
-                <Input type="number" placeholder="Enter Weight" />
-                <Input type="number" placeholder="Enter Original Price" />
-                <Input type="number" placeholder="Enter Price" />
-                <Input type="number" placeholder="Enter Discount" />
-                <Input type="number" placeholder="Enter Total Quantity" />
-                <Input type="number" placeholder="Enter Available Quantity" />
+              <form onSubmit={handleSubmit(onAdd)}>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  {/* Variant Images */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Variant Images
+                    </label>
+                    <input
+                      type="file"
+                      multiple
+                      {...register('image_path', { required: true })}
+                      className="form-control file-control"
+                    />
+                  </div>
 
-                <DialogFooter className="col-span-2 flex justify-end gap-2 mt-4">
-                  <Button type="submit">Add Variant</Button>
-                </DialogFooter>
+                  {/* Variant Alt Content */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Variant Alt Content
+                    </label>
+                    <input
+                      type="text"
+                      {...register('rimg_alt_content', { required: true })}
+                      placeholder="Enter Alt Content"
+                      className="form-control"
+                    />
+                    {errors.rimg_alt_content && (
+                      <p className="text-red-500 text-xs">
+                        Alt content is required
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Variant Color */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Variant Color
+                    </label>
+                    <select
+                      {...register('variant_color', { required: true })}
+                      className="form-control"
+                    >
+                      <option value="">Select Color</option>
+                      {variantColors?.map((v_color) => (
+                        <option key={v_color.color_id} value={v_color.color_id}>
+                          {v_color.color_name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.variant_color && (
+                      <p className="text-red-500 text-xs">Color is required</p>
+                    )}
+                  </div>
+
+                  {/* Variant Name */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Variant Name
+                    </label>
+                    <input
+                      type="text"
+                      {...register('variant_name', { required: true })}
+                      placeholder="Enter Variant Name"
+                      className="form-control"
+                    />
+                  </div>
+
+                  {/* Variant Weight */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Variant Weight (Grams)
+                    </label>
+                    <input
+                      type="number"
+                      {...register('variant_weight', { required: true })}
+                      placeholder="Enter Weight"
+                      className="form-control"
+                    />
+                  </div>
+
+                  {/* Original Price */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Original Price
+                    </label>
+                    <input
+                      type="number"
+                      {...register('original_price', { required: true })}
+                      placeholder="Enter Original Price"
+                      className="form-control"
+                    />
+                  </div>
+
+                  {/* Price */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Price
+                    </label>
+                    <input
+                      type="number"
+                      {...register('price', { required: true })}
+                      placeholder="Enter Price"
+                      className="form-control"
+                    />
+                  </div>
+
+                  {/* Discount */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Discount Percent (%)
+                    </label>
+                    <input
+                      type="number"
+                      {...register('discount', { required: true })}
+                      placeholder="Enter Discount"
+                      className="form-control"
+                    />
+                  </div>
+
+                  {/* Total Quantity */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Total Quantity
+                    </label>
+                    <input
+                      type="number"
+                      {...register('total_qty', { required: true })}
+                      placeholder="Enter Total Quantity"
+                      className="form-control"
+                    />
+                  </div>
+
+                  {/* Available Quantity */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Available Quantity
+                    </label>
+                    <input
+                      type="number"
+                      {...register('available_qty', { required: true })}
+                      placeholder="Enter Available Quantity"
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="modal-footer mt-4 flex justify-end gap-3">
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="deActive-btn text-xs"
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="add-btn text-xs">
+                    Add Variant
+                  </Button>
+                </div>
               </form>
             </DialogContent>
           </Dialog>
@@ -476,45 +676,52 @@ export default function EditProduct() {
                 </tr>
               </thead>
               <tbody>
-                {products.map((p) => (
-                  <tr key={p.product_id} className="border-t">
-                    <td>{p.product_id}</td>
-                    <td>{p.category}</td>
-                    <td>{p.sub_category}</td>
-                    <td>
-                      <span
-                        className={`px-2 py-1 rounded text-xs border ${
-                          p.Availability === 'In Stock' ? 'active' : 'deactive'
-                        }`}
-                      >
-                        {p.Availability}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={`px-2 py-1 rounded text-xs border ${
-                          p.status === 'Active' ? 'active' : 'deactive'
-                        }`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="text-center">
-                      <Link
-                        href={`/products/edit-product/${p_id}/prod-varianr/${p.product_id}`}
-                        className="button-relative group"
-                      >
-                        <span className="button-absolute group-hover:opacity-0">
-                          Edit
+                {products.length > 0 ? (
+                  products?.map((p) => (
+                    <tr key={p.p_v_id} className="border-t">
+                      <td>{p.p_v_id || '--'}</td>
+                      <td>{p.p_v_name || '--'}</td>
+                      <td>{p.final_price || '--'}</td>
+                      <td>
+                        <span
+                          className={`px-2 py-1 rounded text-xs
+                          `}
+                        >
+                          {p.available_quantity || '--'}
                         </span>
-                        <Edit
-                          size={18}
-                          className="btn-icon-absolute group-hover:opacity-100 group-hover:scale-110 group-hover:text-sky-500"
-                        />
-                      </Link>
+                      </td>
+                      <td>
+                        <span
+                          className={`px-2 py-1 rounded text-xs border ${
+                            p.is_deleted == false ? 'active' : 'deactive'
+                          }`}
+                        >
+                          {p.is_deleted == false ? 'Active' : 'Deactive'}
+                        </span>
+                      </td>
+                      <td className="text-center">
+                        <Link
+                          href={`/products/edit-product/${p_id}/edit-prod-variant/${p.p_v_id}`}
+                          className="button-relative group"
+                        >
+                          <span className="button-absolute group-hover:opacity-0">
+                            Edit
+                          </span>
+                          <Edit
+                            size={18}
+                            className="btn-icon-absolute group-hover:opacity-100 group-hover:scale-110 group-hover:text-sky-500"
+                          />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="10" className="text-center p-4">
+                      No variants found
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

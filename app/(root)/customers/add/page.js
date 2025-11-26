@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -15,14 +15,65 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { apiFetch } from '@/lib/api';
+import { toast } from 'sonner';
 
-export default function AddCustomer() {
+export default  function AddCustomer() {
+  const [cities, setCities] = useState([])
   const [file, setFile] = useState(null);
-
+useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const res = await apiFetch('/cities', {
+          cache: 'no-store',
+          method: 'POST',
+        });
+        if (res?.data) {
+          setCities(res.data);
+        } else {
+          toast.error(res.message);
+        }
+      } catch {
+        toast.error('Failed to load cities.');
+      }
+    };
+    fetchCities();
+  }, []);
+console.log(cities)
   // React Hook Form
   const { register, handleSubmit, setValue, watch } = useForm();
 
-  const onSubmit = (data) => {
+  const onSubmit =async (data) => {
+    const formData = {
+      name:data.customerName,
+      email:data.email,
+      phone:data.phone,
+      address:data.address,
+      shopname:data.shopname,
+      account_holder:data.accountHolder,
+      account_number:data.accountNumber,
+      bank_name:data.bank,
+      bank_branch:data.bankBranch,
+      city_id_fk:data.city,
+      address:data.address,
+      photo:file
+
+    }
+    
+    try {
+      const res = await apiFetch('/store-customer', {
+        method: 'POST',
+        cache: 'no-store',
+        body: JSON.stringify(formData),
+      });
+      console.log(res);
+      if (res?.status === true) {
+        toast.success(res.message);
+        
+      } else toast.error(res.message);
+    } catch (err) {
+      toast.error('Error while adding customer.');
+    }
     console.log('Form Data:', data);
     console.log('Uploaded File:', file);
   };
@@ -102,20 +153,10 @@ export default function AddCustomer() {
               {/* Bank Name */}
               <div>
                 <label className="text-sm font-medium">Bank Name</label>
-                <Select
-                  onValueChange={(v) => setValue('bank', v)}
-                  defaultValue={watch('bank')}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Bank" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hbl">HBL</SelectItem>
-                    <SelectItem value="ubl">UBL</SelectItem>
-                    <SelectItem value="mcb">MCB</SelectItem>
-                    <SelectItem value="bank-al-habib">Bank Al Habib</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  placeholder="Account Holder Name"
+                  {...register('bank')}
+                />
               </div>
 
               {/* Account Number */}
@@ -144,10 +185,13 @@ export default function AddCustomer() {
                     <SelectValue placeholder="Select City" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="faisalabad">Faisalabad</SelectItem>
-                    <SelectItem value="lahore">Lahore</SelectItem>
-                    <SelectItem value="karachi">Karachi</SelectItem>
-                    <SelectItem value="islamabad">Islamabad</SelectItem>
+                    {cities.map((city,index) => {
+                      return <SelectItem key={index} value={city.city_id.toString()}>
+  {city.city_name}
+</SelectItem>
+
+                    })}
+                   
                   </SelectContent>
                 </Select>
               </div>
