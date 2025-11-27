@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -14,38 +15,77 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { apiFetch } from '@/lib/api';
-import { useRouter } from 'next/navigation';
+import { apiFetch, IMAGE_BASE_URL } from '@/lib/api';
+import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function AddCustomer() {
-  const [cities, setCities] = useState([]);
+export default function EditCustomer() {
   const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [cities, setCities] = useState([]);
+
+  const params = useParams();
   const router = useRouter();
+  const cust_id = params?.cust_id;
+  const { register, handleSubmit, setValue, watch, reset } = useForm();
 
   useEffect(() => {
-    const fetchCities = async () => {
+    const loadCities = async () => {
       try {
         const res = await apiFetch('/cities', {
-          cache: 'no-store',
           method: 'POST',
+          cache: 'no-store',
         });
+
         if (res?.data) {
           setCities(res.data);
         } else {
-          toast.error(res.message);
+          toast.error('Failed to load cities');
         }
-      } catch {
-        toast.error('Failed to load cities.');
+      } catch (err) {
+        console.error('City load error:', err);
       }
     };
-    fetchCities();
+    loadCities();
   }, []);
-  // React Hook Form
-  const { register, handleSubmit, setValue, watch } = useForm();
+
+  // Load customer data
+  useEffect(() => {
+    const loadCustomer = async () => {
+      const res = await apiFetch(`/customer/${cust_id}`, {
+        method: 'POST',
+        cache: 'no-store',
+      });
+      console.log(res);
+
+      if (res?.data) {
+        const c = res.data;
+
+        reset({
+          customerName: c.name,
+          phone: c.phone,
+          email: c.email,
+          shopName: c.shopname,
+          accountHolder: c.account_holder,
+          bank: c.bank_name,
+          accountNumber: c.account_number,
+          bankBranch: c.bank_branch,
+          city: c.city_id_fk?.toString(),
+          address: c.address,
+        });
+
+        if (c.photo) {
+          setPreview(`${IMAGE_BASE_URL}/${c.photo}`);
+        }
+      }
+    };
+
+    if (cust_id) loadCustomer();
+  }, [cust_id, reset]);
 
   const onSubmit = async (data) => {
     const body = new FormData();
+    body.append('id', cust_id);
     body.append('name', data.customerName);
     body.append('email', data.email);
     body.append('phone', data.phone);
@@ -59,18 +99,20 @@ export default function AddCustomer() {
     if (file) body.append('photo', file);
 
     try {
-      const res = await apiFetch('/store-customer', {
+      const res = await apiFetch('/update-customer', {
         method: 'POST',
-        body, // FormData
+        body,
       });
-      console.log(res);
+
       if (res?.status === true) {
         toast.success(res.message);
-        router.push('/customers'); // now will work
-      } else toast.error(res.message);
+        router.push('/customers');
+      } else {
+        toast.error(res.message);
+      }
     } catch (err) {
       console.error(err);
-      toast.error('Error while adding customer.');
+      toast.error('Failed to update customer.');
     }
   };
 
@@ -78,86 +120,77 @@ export default function AddCustomer() {
     <div>
       <Card className="border shadow-sm rounded-lg">
         <CardHeader className="border-b">
-          <CardTitle>Add Customer</CardTitle>
+          <CardTitle>Edit Customer</CardTitle>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Avatar + Upload */}
             <div className="flex items-center gap-6">
+              <div className="w-20 h-20 rounded-full overflow-hidden border">
+                <Image
+                  src={preview || '/default-avatar.png'}
+                  width={80}
+                  height={80}
+                  alt="User"
+                  className="object-cover"
+                />
+              </div>
+
               <Input
                 type="file"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="w-full"
+                onChange={(e) => {
+                  const f = e.target.files?.[0] ?? null;
+                  setFile(f);
+                  if (f) setPreview(URL.createObjectURL(f));
+                }}
+                className="max-w-xs"
               />
             </div>
 
             {/* Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Customer Name */}
               <div>
                 <label className="text-sm font-medium">Customer Name *</label>
-                <Input
-                  placeholder="Enter customer name"
-                  {...register('customerName', { required: true })}
-                />
+                <Input {...register('customerName', { required: true })} />
               </div>
 
-              {/* Phone */}
               <div>
                 <label className="text-sm font-medium">Customer Phone *</label>
-                <Input
-                  placeholder="Enter phone number"
-                  {...register('phone', { required: true })}
-                />
+                <Input {...register('phone', { required: true })} />
               </div>
 
-              {/* Email */}
               <div>
                 <label className="text-sm font-medium">Customer Email</label>
-                <Input placeholder="email@example.com" {...register('email')} />
+                <Input {...register('email')} />
               </div>
 
-              {/* Shop Name */}
               <div>
                 <label className="text-sm font-medium">Shop Name</label>
-                <Input
-                  placeholder="Enter shop name"
-                  {...register('shopName')}
-                />
+                <Input {...register('shopName')} />
               </div>
 
-              {/* Account Holder */}
               <div>
                 <label className="text-sm font-medium">Account Holder</label>
-                <Input
-                  placeholder="Account Holder Name"
-                  {...register('accountHolder')}
-                />
+                <Input {...register('accountHolder')} />
               </div>
 
-              {/* Bank Name */}
               <div>
                 <label className="text-sm font-medium">Bank Name</label>
-                <Input placeholder="Bank Name" {...register('bank')} />
+                <Input {...register('bank')} />
               </div>
 
-              {/* Account Number */}
               <div>
                 <label className="text-sm font-medium">Account Number</label>
-                <Input
-                  placeholder="Account Number"
-                  {...register('accountNumber')}
-                />
+                <Input {...register('accountNumber')} />
               </div>
 
-              {/* Bank Branch */}
               <div>
                 <label className="text-sm font-medium">Bank Branch</label>
-                <Input placeholder="Bank Branch" {...register('bankBranch')} />
+                <Input {...register('bankBranch')} />
               </div>
 
-              {/* Customer City */}
+              {/* City */}
               <div>
                 <label className="text-sm font-medium">Customer City *</label>
                 <Select
@@ -167,31 +200,35 @@ export default function AddCustomer() {
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select City" />
                   </SelectTrigger>
+
                   <SelectContent>
-                    {cities.map((city, index) => {
-                      return (
-                        <SelectItem key={index} value={city.city_id.toString()}>
-                          {city.city_name}
-                        </SelectItem>
-                      );
-                    })}
+                    {cities.map((city) => (
+                      <SelectItem
+                        key={city.city_id}
+                        value={city.city_id.toString()}
+                      >
+                        {city.city_name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            {/* Address */}
             <div className="flex flex-col pt-2">
               <label className="text-sm font-medium">Customer Address</label>
-              <Textarea
-                placeholder="Enter full address..."
-                {...register('address')}
-              />
+              <Textarea {...register('address')} />
             </div>
 
-            {/* Buttons */}
             <div className="flex justify-end gap-3 pt-4">
-              <Button type="submit">Add Customer</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Update</Button>
             </div>
           </form>
         </CardContent>

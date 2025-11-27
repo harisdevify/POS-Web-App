@@ -1,32 +1,87 @@
 'use client';
 
+import TableLoader from '@/components/TableLoader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useState } from 'react';
-
-const initialModules = [
-  { id: 1, module: 'Dashboard', read: true, write: false },
-  { id: 2, module: 'Products', read: true, write: true },
-  { id: 3, module: 'Categories', read: true, write: false },
-  { id: 4, module: 'Suppliers', read: true, write: false },
-  { id: 5, module: 'Customers', read: true, write: false },
-  { id: 6, module: 'Sales', read: true, write: true },
-  { id: 7, module: 'Reports', read: true, write: false },
-];
+import { apiFetch } from '@/lib/api';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 export default function AssignRoles() {
-  const [modules, setModules] = useState(initialModules);
-  const [roleName, setRoleName] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [rolesData, setRolesData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
 
-  const handleSave = () => {
-    if (!roleName.trim()) {
-      alert('⚠️ Please enter a role name before saving.');
-      return;
+  useEffect(() => {
+    setLoading(true);
+    const loadData = async () => {
+      try {
+        const res = await apiFetch('/module/get', {
+          method: 'POST',
+        });
+        if (res) {
+          setRolesData(res?.data);
+        }
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmitAdd = async (formData) => {
+    setIsProcessing(true);
+
+    try {
+      const formattedRoles = rolesData.map((role) => {
+        const moduleId = role.module_id;
+        return {
+          role_id: role.module_role_id,
+          module_id: moduleId,
+          is_view: formData[`view_${moduleId}`] ? 1 : 0,
+          is_writeable: formData[`write_${moduleId}`] ? 1 : 0,
+        };
+      });
+
+      const res = await apiFetch('/module-role/create', {
+        method: 'POST',
+        cache: 'no-store',
+        body: JSON.stringify({
+          role_name: formData.modalRoleName,
+          user_id: userId,
+          rolesArray: formattedRoles,
+        }),
+      });
+
+      if (res?.status === true) {
+        toast.success(res.message);
+        router.push('/roles-manage/roles');
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      console.error('Submit error:', error);
+    } finally {
+      setIsProcessing(false);
     }
-    alert(`Permissions for "${roleName}" saved successfully ✅`);
   };
 
   return (
@@ -35,59 +90,94 @@ export default function AssignRoles() {
         <CardTitle className="text-lg font-medium">Assign Roles</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Role Name Input */}
-        <div>
-          <label className="block mb-2 text-sm font-medium">Role Name</label>
-          <Input
-            type="text"
-            value={roleName}
-            onChange={(e) => setRoleName(e.target.value)}
-            placeholder="Enter Role Name"
-          />
-        </div>
-        {/* Table */}
-        <div className="overflow-x-auto table_scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>No.</th>
-                <th>Module</th>
-                <th>Permissions</th>
-              </tr>
-            </thead>
+        <form
+          onSubmit={handleSubmit(onSubmitAdd)}
+          className="space-y-6 card-info"
+        >
+          {/* Role Name Input */}
+          <div>
+            <label className="block mb-2 text-sm font-medium">Role Name</label>
+            <Input
+              {...register('modalRoleName', {
+                required: 'Role name is required.',
+              })}
+              type="text"
+              id="modalRoleName"
+              placeholder="Enter a role name"
+            />
+            {errors.modalRoleName && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.modalRoleName.message}
+              </p>
+            )}
+          </div>
+          {/* Table */}
+          <div className="overflow-x-auto table_scroll">
+            {loading ? (
+              <TableLoader />
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>Module</th>
+                    <th>Permissions</th>
+                  </tr>
+                </thead>
 
-            <tbody>
-              {modules.map((m, idx) => (
-                <tr key={m.id}>
-                  <td>{idx + 1}</td>
-                  <td>{m.module}</td>
-                  <td className="min-w-[200px]">
-                    <div className="flex items-center justify-start gap-6 flex-wrap min-w-[200px]">
-                      <div className="flex items-center gap-2">
-                        <Checkbox className="cursor-pointer" />
-                        <Label className="text-sm select-none">Read</Label>
-                      </div>
+                <tbody>
+                  {rolesData.map((m, idx) => (
+                    <tr key={m.id}>
+                      <td>{idx + 1}</td>
+                      <td>{m.module_name}</td>
+                      <td className="min-w-[200px]">
+                        <div className="flex items-center justify-start gap-6 flex-wrap min-w-[200px]">
+                          <div className="flex items-center gap-2">
+                            <Controller
+                              name={`view_${m.module_id}`}
+                              control={control}
+                              render={({ field }) => (
+                                <input
+                                  type="checkbox"
+                                  className="h-5 w-5 text-blue-600"
+                                  {...field}
+                                />
+                              )}
+                            />
+                            <Label className="text-sm select-none">Read</Label>
+                          </div>
 
-                      {/* Write */}
-                      <div className="flex items-center gap-2">
-                        <Checkbox className="cursor-pointer" />
-                        <Label className="text-sm select-none">Write</Label>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                          {/* Write */}
+                          <div className="flex items-center gap-2">
+                            <Controller
+                              name={`write_${m.module_id}`}
+                              control={control}
+                              render={({ field }) => (
+                                <input
+                                  type="checkbox"
+                                  className="h-5 w-5 text-blue-600"
+                                  {...field}
+                                />
+                              )}
+                            />
+                            <Label className="text-sm select-none">Write</Label>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t flex flex-wrap justify-end gap-2">
-          <Button variant="outline" onClick={() => setModules(initialModules)}>
-            Reset
-          </Button>
-          <Button onClick={handleSave}>Save Permissions</Button>
-        </div>
+          {/* Footer */}
+          <div className="p-4 border-t flex flex-wrap justify-end gap-2">
+            <Button disabled={isProcessing}>
+              {isProcessing ? 'Adding...' : 'Assign Role'}
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

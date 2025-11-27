@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -30,20 +28,10 @@ export default function AddUser() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Avatar + Upload */}
             <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-full overflow-hidden border">
-                <Image
-                  src="/table.jpg"
-                  width={80}
-                  height={80}
-                  alt="User"
-                  className="object-cover"
-                />
-              </div>
-
               <Input
                 type="file"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="max-w-xs"
+                className="w-full"
               />
             </div>
 
@@ -89,12 +77,6 @@ export default function AddUser() {
 
             {/* Buttons */}
             <div className="flex justify-end gap-3 pt-4">
-              <Link href="/employees">
-                <Button variant="outline" type="button">
-                  Cancel
-                </Button>
-              </Link>
-
               <Button type="submit">Add User</Button>
             </div>
           </form>

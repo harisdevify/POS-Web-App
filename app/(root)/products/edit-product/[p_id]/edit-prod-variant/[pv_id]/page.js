@@ -3,13 +3,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { apiFetch, IMAGE_BASE_URL } from '@/lib/api';
 import { Trash2 } from 'lucide-react';
@@ -270,25 +263,18 @@ export default function ProductVariant({ params }) {
                   name="variant_color"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      className="w-full"
-                      onValueChange={(value) => field.onChange(Number(value))}
-                      defaultValue={String(field.value)}
+                    <select
+                      className="w-full border rounded-md p-2"
+                      value={field.value}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
                     >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Color" />
-                      </SelectTrigger>
-                      <SelectContent className="w-full">
-                        {variantColors.map((color) => (
-                          <SelectItem
-                            key={color.color_id}
-                            value={String(color.color_id)}
-                          >
-                            {color.color_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <option value="">Select Color</option>
+                      {variantColors.map((color) => (
+                        <option key={color.color_id} value={color.color_id}>
+                          {color.color_name}
+                        </option>
+                      ))}
+                    </select>
                   )}
                 />
               </div>
@@ -337,19 +323,15 @@ export default function ProductVariant({ params }) {
                   name="in_stock"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      className="w-full"
-                      onValueChange={(value) => field.onChange(Number(value))}
-                      defaultValue={String(field.value)}
+                    <select
+                      className="w-full border rounded-md p-2"
+                      value={field.value}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
                     >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent className="w-full">
-                        <SelectItem value="1">Yes</SelectItem>
-                        <SelectItem value="0">No</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="">Select</option>
+                      <option value="1">Yes</option>
+                      <option value="0">No</option>
+                    </select>
                   )}
                 />
               </div>

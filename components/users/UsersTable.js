@@ -1,3 +1,4 @@
+import { IMAGE_BASE_URL } from '@/lib/api';
 import { Edit } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,26 +21,29 @@ const UsersTable = ({ users }) => {
 
         <tbody>
           {users.length > 0 ? (
-            users.map((e) => (
-              <tr key={e.id}>
+            users.map((e, i) => (
+              <tr key={i}>
                 <td>
                   <Image
-                    src={e.photo}
-                    alt={e.name}
+                    src={
+                      `${IMAGE_BASE_URL}/${e.profile_pic}` ||
+                      '/default-avatar.png'
+                    }
+                    alt={e.full_name}
                     width={40}
                     height={40}
                     className="rounded-md"
                   />
                 </td>
-                <td>{e.name}</td>
+                <td>{e.full_name}</td>
                 <td>{e.email}</td>
                 <td>{e.phone}</td>
-                <td>{e.salary}</td>
-                <td>{e.city}</td>
+                <td>{e.salary || 'no in API'}</td>
+                <td>{e.address}</td>
                 <td>
                   <div className="flex justify-center gap-2">
                     <Link
-                      href={`/users/edit/${e.id}`}
+                      href={`/users/edit/${e.us_id_fk}`}
                       className="button-relative group"
                     >
                       <span className="button-absolute group-hover:opacity-0">

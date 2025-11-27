@@ -7,16 +7,54 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import Link from 'next/link';
+import { apiFetch } from '@/lib/api';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function AddCategory() {
   const [file, setFile] = useState(null);
+  const router = useRouter();
 
-  // React Hook Form
-  const { register, handleSubmit } = useForm();
-  const onSubmit = (data) => {
-    console.log('Form Data:', data);
-    console.log('Uploaded File:', file);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    const formData = new FormData();
+
+    //  Corrected backend fields
+    formData.append('p_category_name', data.categoryName);
+    formData.append('pcat_image', file);
+    formData.append('pcat_title', data.categoryTitle);
+    formData.append('pcat_subtitle', data.categorySubtitle);
+    formData.append('pcat_short_desc', data.shortDescription);
+    formData.append('pcat_long_desc', data.longDescription);
+
+    formData.append('keywords', data.keywords);
+    formData.append('meta_title', data.metaTitle);
+    formData.append('meta_description', data.metaDescription);
+
+    try {
+      const res = await apiFetch('/add-product-categories', {
+        method: 'POST',
+        cache: 'no-store',
+        body: formData,
+      });
+
+      if (res.status === true) {
+        toast.success(res.message);
+        router.push('/products/categories');
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+
+    reset();
   };
 
   return (
@@ -104,9 +142,6 @@ export default function AddCategory() {
 
             {/* Buttons */}
             <div className="flex justify-end gap-3 pt-4">
-              <Button asChild variant="outline">
-                <Link href="/products/categories">Cancel</Link>
-              </Button>
               <Button type="submit">Submit</Button>
             </div>
           </form>
